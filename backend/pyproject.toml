@@ -13,3 +13,19 @@ dependencies = [
     "sqlalchemy>=2.0.45",
     "uvicorn>=0.38.0",
 ]
+
+[dependency-groups]
+dev = [
+    "black>=25.12.0",
+    "ruff>=0.14.10",
+]
+
+[tool.ruff]
+line-length = 88
+select = ["E", "F", "I"]
+ignore = ["E501"]
+
+[tool.black]
+line-length = 88
+target-version = ["py311"]
+

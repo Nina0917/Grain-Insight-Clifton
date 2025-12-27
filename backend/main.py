@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from core.config import settings
+
 # from routers import story, job
 from models import user, job  # 加在 create_tables() 之前，注册表
 from db.database import create_tables
@@ -29,4 +30,5 @@ app.add_middleware(
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)

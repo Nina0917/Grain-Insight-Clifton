@@ -1,0 +1,37 @@
+name: Backend CI
+
+on:
+  pull_request:
+    paths:
+      - backend/**
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # 1️⃣ install Python 3.11
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      # 2️⃣ install uv
+      - name: Install uv
+        run: curl -LsSf https://astral.sh/uv/install.sh | sh
+
+      # 3️⃣ install dependencies (based on uv.lock)
+      - name: Install dependencies
+        run: uv sync --frozen
+
+        # 4️⃣ Ruff lint
+      - name: Ruff check
+        run: uv run ruff check .
+
+      # 5️⃣ Black format check
+      - name: Black check
+        run: uv run black --check .

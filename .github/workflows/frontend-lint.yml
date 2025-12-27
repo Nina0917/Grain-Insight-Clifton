@@ -1,0 +1,25 @@
+name: Frontend Lint & Format Check
+
+on:
+  pull_request:
+    paths:
+      - frontend/**
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run format:check
