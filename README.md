@@ -50,6 +50,6 @@ npm run format && npm run lint
 Check python code format
 
 ```
-uv run ruff check .
+uv run ruff check . --fix
 uv run black .
 ```
