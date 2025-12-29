@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from core.config import settings
 
 # from routers import story, job
-from models import user, job  # 加在 create_tables() 之前，注册表
+from models import status, role, user, document, job  # 加在 create_tables() 之前，注册表
 from db.database import create_tables
 
 create_tables()
