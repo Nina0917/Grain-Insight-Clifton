@@ -1,7 +1,8 @@
-from typing import List
-from pydantic_settings import BaseSettings
-from pydantic import field_validator
 import os
+from typing import List
+
+from pydantic import field_validator
+from pydantic_settings import BaseSettings
 
 
 # Anything added here needs to be sync with env
