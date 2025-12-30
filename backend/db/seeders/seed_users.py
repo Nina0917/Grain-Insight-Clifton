@@ -1,14 +1,14 @@
-from models.status import Status
-from models.role import Role
-from db.database import SessionLocal, create_tables
-from models.user import User
 from core.security import get_password_hash
+from db.database import SessionLocal
+from models.role import Role
+from models.status import Status
+from models.user import User
 
 
 def seed_users():
     db = SessionLocal()
 
-     # 查询对应的 status_id
+    # 查询对应的 status_id
     status = db.query(Status).filter(Status.name == "Active").first()
     role_admin = db.query(Role).filter(Role.name == "Admin").first()
     role_user = db.query(Role).filter(Role.name == "User").first()

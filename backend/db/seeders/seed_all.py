@@ -1,11 +1,11 @@
-from db.seeders.seed_users import seed_users
+from db.database import SessionLocal
 from db.seeders.seed_roles import seed_roles
 from db.seeders.seed_statuses import seed_statuses
-
-from db.database import SessionLocal
-from models.user import User
+from db.seeders.seed_users import seed_users
 from models.role import Role
 from models.status import Status
+from models.user import User
+
 
 def clear_tables():
     db = SessionLocal()

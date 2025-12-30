@@ -1,5 +1,6 @@
-from db.database import SessionLocal, create_tables
+from db.database import SessionLocal
 from models.status import Status
+
 
 def seed_statuses():
     db = SessionLocal()
@@ -15,10 +16,7 @@ def seed_statuses():
             print(f"Status '{s['name']}' already exists, skipping")
             continue
 
-        status = Status(
-            name=s["name"],
-            description=s["description"]
-        )
+        status = Status(name=s["name"], description=s["description"])
         db.add(status)
 
     db.commit()

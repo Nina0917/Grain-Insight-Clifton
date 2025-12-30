@@ -1,5 +1,6 @@
-from db.database import SessionLocal, create_tables
+from db.database import SessionLocal
 from models.role import Role
+
 
 def seed_roles():
     db = SessionLocal()
@@ -15,10 +16,7 @@ def seed_roles():
             print(f"Role '{r['name']}' already exists, skipping")
             continue
 
-        role = Role(
-            name=r["name"],
-            description=r["description"]
-        )
+        role = Role(name=r["name"], description=r["description"])
         db.add(role)
 
     db.commit()
