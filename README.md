@@ -39,6 +39,13 @@ uv run python main.py
 
 The API will be available at: http://localhost:8000
 
+# Run Seeder
+
+```
+cd backend
+python -m db.seeders.seed_all
+```
+
 # Github Actions
 
 Check frontend format
@@ -121,13 +128,13 @@ https://dbeaver.io/download/
 
 ## 2. Connect to SQLite Database
 
-![alt text](docs\images\image.png)
+![alt text](docs/images/image.png)
 
-![alt text](docs\images\image-1.png)
+![alt text](docs/images/image-1.png)
 
-![alt text](docs\images\image-2.png)
+![alt text](docs/images/image-2.png)
 
-![alt text](docs\images\image-3.png)
+![alt text](docs/images/image-3.png)
 
 ## 3. Table Registration
 
