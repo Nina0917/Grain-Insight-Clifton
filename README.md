@@ -53,3 +53,9 @@ Check python code format
 uv run ruff check . --fix
 uv run black .
 ```
+
+# Frontend UI
+
+This project uses [daisyUI](https://daisyui.com/) as a Tailwind CSS component library for building the frontend UI.
+
+The default daisyUI theme is set to **corporate** for a clean and professional appearance.
