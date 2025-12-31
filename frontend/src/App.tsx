@@ -1,24 +1,47 @@
-// src/App.tsx
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+// Main App component with routing configuration
 
-import AppLayout from "./layouts/AppLayout";
-import Login from "./pages/Login";
-import Dashboard from "./pages/Dashboard";
-import Users from "./pages/Users";
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider } from './contexts/AuthContext';
+import { ProtectedRoute } from './components/ProtectedRoute';
+import Login from './pages/Login';
+import Dashboard from './pages/Dashboard';
+import Users from './pages/Users';
 
-export default function App() {
+function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        {/* ❌ 登录页：没有 Navbar */}
-        <Route path="/login" element={<Login />} />
-
-        {/* ✅ 其他页面：有 Navbar */}
-        <Route element={<AppLayout />}>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/users" element={<Users />} />
-        </Route>
-      </Routes>
+      {/* Wrap app with AuthProvider to provide auth state globally */}
+      <AuthProvider>
+        <Routes>
+          {/* Public route - Login page */}
+          <Route path="/login" element={<Login />} />
+          
+          {/* Protected route - Dashboard (requires authentication) */}
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          
+          {/* Protected route - Users page (requires admin role) */}
+          <Route
+            path="/users"
+            element={
+              <ProtectedRoute requireAdmin={true}>
+                <Users />
+              </ProtectedRoute>
+            }
+          />
+          
+          {/* Redirect root to dashboard */}
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        </Routes>
+      </AuthProvider>
     </BrowserRouter>
   );
 }
+
+export default App;
