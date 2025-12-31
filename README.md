@@ -43,7 +43,8 @@ The API will be available at: http://localhost:8000
 
 ```
 cd backend
-python -m db.seeders.seed_all
+
+uv run python -m db.seeders.seed_all
 ```
 
 # Github Actions
@@ -118,9 +119,3 @@ https://dbeaver.io/download/
 ![alt text](docs/images/image-2.png)
 
 ![alt text](docs/images/image-3.png)
-
-## 3. Table Registration
-
-When using SQLAlchemy to automatically create database tables, calling create_tables() will only create tables for model classes that have been registered with Base. Only if these models (such as `from models import user, job`) are imported in main.py or other executed files, can SQLAlchemy "discover" these models and register them with Base. Otherwise, even if create_tables() is called, the corresponding tables will not be created.
-
-Therefore, be sure to import all model classes corresponding to the tables you need to create somewhere in your project (such as in `main.py` or a `router`). This ensures that create_tables() works properly and all tables are created as expected.
