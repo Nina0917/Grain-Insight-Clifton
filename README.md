@@ -39,6 +39,22 @@ uv run python main.py
 
 The API will be available at: http://localhost:8000
 
+# Create/Update Tables
+
+Whenever you make changes to your models, run this command to generate a migration script that keeps your database schema in sync with your models.
+
+```
+uv run alembic revision --autogenerate
+```
+
+This command applies the latest migration(s) to your database
+
+```
+uv run alembic upgrade head
+```
+
+This command applies the latest migration(s) to your database
+
 # Run Seeder
 
 ```
@@ -94,11 +110,9 @@ This project switches the database connection method based on the value of the `
 - Suitable for production environments.
 - This will connect to a remote PostgreSQL database.
 
-## Code Snippet
+## 3. Code Snippet
 
 Relevant logic is in `core/config.py`
-
----
 
 To switch databases, simply modify the `DEBUG` and related variables in the `.env` file.
 

@@ -23,13 +23,16 @@ dev = [
     "ruff>=0.14.10",
 ]
 
-
 [tool.ruff]
 line-length = 88
 
 [tool.ruff.lint]
 select = ["E", "F", "I"]
 ignore = ["E501"]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]
+
 
 [tool.black]
 line-length = 88
