@@ -20,4 +20,5 @@ def get_db():
 
 
 def create_tables():
+    from models import user, role, status, job, document 
     Base.metadata.create_all(bind=engine)
