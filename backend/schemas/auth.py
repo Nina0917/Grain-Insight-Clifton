@@ -3,15 +3,17 @@ from pydantic import BaseModel, EmailStr
 
 class LoginRequest(BaseModel):
     """Login request schema"""
+
     email: EmailStr
     password: str
 
 
 class LoginResponse(BaseModel):
     """Login response schema"""
+
     access_token: str
     token_type: str = "bearer"
-    user: dict  
+    user: dict
 
     class Config:
         from_attributes = True
@@ -19,6 +21,7 @@ class LoginResponse(BaseModel):
 
 class UserInfo(BaseModel):
     """User information schema (without password)"""
+
     id: int
     first_name: str
     last_name: str

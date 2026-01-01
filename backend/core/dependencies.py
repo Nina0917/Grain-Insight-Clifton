@@ -12,11 +12,11 @@ security = HTTPBearer()
 
 def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(security),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ) -> User:
     """Get current authenticated user"""
     token = credentials.credentials
-    
+
     # Decode token
     payload = decode_access_token(token)
     if payload is None:
@@ -25,7 +25,7 @@ def get_current_user(
             detail="Invalid authentication credentials",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    
+
     # Get user ID
     user_id: int = payload.get("sub")
     if user_id is None:
@@ -34,7 +34,7 @@ def get_current_user(
             detail="Invalid authentication credentials",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    
+
     # Query user from database
     user = db.query(User).filter(User.id == user_id).first()
     if user is None:
@@ -43,7 +43,7 @@ def get_current_user(
             detail="User not found",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    
+
     return user
 
 
@@ -51,7 +51,6 @@ def require_admin(current_user: User = Depends(get_current_user)) -> User:
     """Require user to be admin (role_id = 1, assuming 1 is admin)"""
     if current_user.role_id != 1:  # Assuming role_id 1 is admin
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Admin access required"
+            status_code=status.HTTP_403_FORBIDDEN, detail="Admin access required"
         )
     return current_user

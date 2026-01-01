@@ -22,8 +22,8 @@ app.add_middleware(
 
 # app.include_router(story.router, prefix=settings.API_PREFIX)
 # app.include_router(job.router, prefix=settings.API_PREFIX)
-app.include_router(auth.router, prefix = "/api")
-app.include_router(user.router, prefix = "/api")
+app.include_router(auth.router, prefix="/api")
+app.include_router(user.router, prefix="/api")
 
 if __name__ == "__main__":
     import uvicorn
