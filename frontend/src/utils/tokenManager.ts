@@ -1,6 +1,6 @@
 // Token management utility for localStorage operations
 
-const TOKEN_KEY = 'access_token';
+const TOKEN_KEY = "access_token";
 
 export const tokenManager = {
   /**
@@ -32,5 +32,5 @@ export const tokenManager = {
    */
   hasToken(): boolean {
     return !!this.getToken();
-  }
+  },
 };

@@ -1,15 +1,15 @@
-import axios from 'axios';
-import { LoginResponse, UserInfo } from '../types/auth';
-import { tokenManager } from '../utils/tokenManager';
+import axios from "axios";
+import { LoginResponse, UserInfo } from "../types/auth";
+import { tokenManager } from "../utils/tokenManager";
 
 // Backend API base URL
-const API_BASE_URL = 'http://localhost:8000/api';
+const API_BASE_URL = "http://localhost:8000/api";
 
 // Create axios instance with default configuration
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
 });
 
@@ -34,7 +34,7 @@ apiClient.interceptors.response.use(
     // If token is invalid or expired, redirect to login
     if (error.response?.status === 401) {
       tokenManager.removeToken();
-      window.location.href = '/login';
+      window.location.href = "/login";
     }
     return Promise.reject(error);
   }
@@ -49,23 +49,23 @@ export const authService = {
    */
   async login(email: string, password: string): Promise<LoginResponse> {
     const formData = new URLSearchParams();
-    formData.append('username', email);  
-    formData.append('password', password);
-    formData.append('grant_type', 'password');  
-    
+    formData.append("username", email);
+    formData.append("password", password);
+    formData.append("grant_type", "password");
+
     const response = await axios.post<LoginResponse>(
       `${API_BASE_URL}/auth/token`,
       formData,
       {
         headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
+          "Content-Type": "application/x-www-form-urlencoded",
         },
       }
     );
-    
+
     // Save token to localStorage
     tokenManager.setToken(response.data.access_token);
-    
+
     return response.data;
   },
 
@@ -74,7 +74,7 @@ export const authService = {
    * @returns Current user's information
    */
   async getCurrentUser(): Promise<UserInfo> {
-    const response = await apiClient.get<UserInfo>('/auth/me');
+    const response = await apiClient.get<UserInfo>("/auth/me");
     return response.data;
   },
 

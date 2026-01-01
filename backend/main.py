@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from core.config import settings
-from routers import auth,user
+from routers import auth, user
 
 app = FastAPI(
     title="Grain Insight Clifton API",

@@ -1,8 +1,8 @@
 from datetime import datetime, timedelta
 from typing import Optional
 
-from jose import JWTError, jwt
 import bcrypt
+from jose import JWTError, jwt
 
 # JWT configuration - Should be read from environment variables in production
 SECRET_KEY = "your-secret-key-change-this-in-production"

@@ -1,15 +1,15 @@
 // Login page component with form validation and error handling
 
-import React, { useState } from 'react';
-import { useAuth } from '../contexts/AuthContext';
+import React, { useState } from "react";
+import { useAuth } from "../contexts/AuthContext";
 
 export default function Login() {
   // Form state
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  
+
   // Get login function from auth context
   const { login } = useAuth();
 
@@ -19,7 +19,7 @@ export default function Login() {
    */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setError("");
     setIsLoading(true);
 
     try {
@@ -28,7 +28,7 @@ export default function Login() {
       // On success, user will be redirected to dashboard by AuthContext
     } catch (err: any) {
       // Display error message from backend or generic message
-      setError(err.response?.data?.detail || 'Login failed. Please try again.');
+      setError(err.response?.data?.detail || "Login failed. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -39,8 +39,10 @@ export default function Login() {
       <div className="card w-96 bg-base-100 shadow-xl">
         <div className="card-body">
           {/* Page Title */}
-          <h2 className="card-title text-2xl font-bold text-center mb-4">Login</h2>
-          
+          <h2 className="card-title text-2xl font-bold text-center mb-4">
+            Login
+          </h2>
+
           <form onSubmit={handleSubmit}>
             {/* Email Input Field */}
             <div className="form-control">
@@ -98,10 +100,10 @@ export default function Login() {
             <div className="form-control mt-6">
               <button
                 type="submit"
-                className={`btn btn-primary ${isLoading ? 'loading' : ''}`}
+                className={`btn btn-primary ${isLoading ? "loading" : ""}`}
                 disabled={isLoading}
               >
-                {isLoading ? 'Logging in...' : 'Login'}
+                {isLoading ? "Logging in..." : "Login"}
               </button>
             </div>
           </form>

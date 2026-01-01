@@ -1,8 +1,8 @@
 // Protected route component to restrict access based on authentication and role
 
-import React from 'react';
-import { Navigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
+import React from "react";
+import { Navigate } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -14,9 +14,9 @@ interface ProtectedRouteProps {
  * Wraps routes that require authentication
  * Optionally can require admin role
  */
-export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ 
-  children, 
-  requireAdmin = false 
+export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
+  children,
+  requireAdmin = false,
 }) => {
   const { isAuthenticated, isAdmin, isLoading } = useAuth();
 

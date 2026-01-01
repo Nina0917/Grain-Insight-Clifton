@@ -1,10 +1,10 @@
 // Global authentication context for managing user state across the app
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { authService } from '../services/authService';
-import { AuthContextType, UserInfo } from '../types/auth';
-import { tokenManager } from '../utils/tokenManager';
+import React, { createContext, useContext, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { authService } from "../services/authService";
+import { AuthContextType, UserInfo } from "../types/auth";
+import { tokenManager } from "../utils/tokenManager";
 
 // Create auth context
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -12,7 +12,9 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 /**
  * AuthProvider component to wrap the app and provide auth state
  */
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const [user, setUser] = useState<UserInfo | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
@@ -27,7 +29,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           const userData = await authService.getCurrentUser();
           setUser(userData);
         } catch (error) {
-          console.error('Failed to get user info:', error);
+          console.error("Failed to get user info:", error);
           // If token is invalid, remove it
           tokenManager.removeToken();
         }
@@ -48,7 +50,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const response = await authService.login(email, password);
       setUser(response.user);
       // Redirect to dashboard after successful login
-      navigate('/dashboard');
+      navigate("/dashboard");
     } catch (error) {
       throw error;
     }
@@ -61,7 +63,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logout = () => {
     authService.logout();
     setUser(null);
-    navigate('/login');
+    navigate("/login");
   };
 
   /**
@@ -92,7 +94,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };
