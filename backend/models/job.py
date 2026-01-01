@@ -4,7 +4,7 @@ from sqlalchemy.sql import func
 from db.database import Base
 
 
-class StoryJob(Base):
+class Job(Base):
     __tablename__ = "jobs"
 
     id = Column(Integer, primary_key=True, index=True)

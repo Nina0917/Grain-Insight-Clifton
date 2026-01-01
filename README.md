@@ -39,11 +39,28 @@ uv run python main.py
 
 The API will be available at: http://localhost:8000
 
+# Create/Update Tables
+
+Whenever you make changes to your models, run this command to generate a migration script that keeps your database schema in sync with your models.
+
+```
+uv run alembic revision --autogenerate
+```
+
+This command applies the latest migration(s) to your database
+
+```
+uv run alembic upgrade head
+```
+
+This command applies the latest migration(s) to your database
+
 # Run Seeder
 
 ```
 cd backend
-python -m db.seeders.seed_all
+
+uv run python -m db.seeders.seed_all
 ```
 
 # Github Actions
@@ -63,13 +80,13 @@ uv run black .
 
 # Frontend UI
 
-This project uses [daisyUI](https://daisyui.com/) as a Tailwind CSS component library for building the frontend UI.
+This project uses [daisyUI](https://daisyui.com/)
 
-The default daisyUI theme is set to **corporate** for a clean and professional appearance.
+The default daisyUI theme is set to **corporate**
 
 # Database Switching Logic Explanation
 
-This project automatically switches the database connection method based on the value of the `DEBUG` configuration:
+This project switches the database connection method based on the value of the `DEBUG` configuration:
 
 ## 1. When DEBUG=True
 
@@ -93,34 +110,15 @@ This project automatically switches the database connection method based on the 
 - Suitable for production environments.
 - This will connect to a remote PostgreSQL database.
 
-## Code Snippet
+## 3. Code Snippet
 
-Relevant logic in `core/config.py`:
-
-```python
-class Settings(BaseSettings):
-    ...
-    DATABASE_URL: str = None
-    DEBUG: bool = False
-    ...
-    def __init__(self, **values):
-        super().__init__(**values)
-        if not self.DEBUG:
-            db_user = os.getenv("DB_USER")
-            db_password = os.getenv("DB_PASSWORD")
-            db_host = os.getenv("DB_HOST")
-            db_port = os.getenv("DB_PORT")
-            db_name = os.getenv("DB_NAME")
-            self.DATABASE_URL = f"postgresql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
-```
-
----
+Relevant logic is in `core/config.py`
 
 To switch databases, simply modify the `DEBUG` and related variables in the `.env` file.
 
 # DBeaver
 
-DBeaver is a powerful database management and data visualization tool that supports various database types (such as SQLite, PostgreSQL, MySQL, etc.). We recommend using DBeaver for data visualization for the following reasons:
+DBeaver supports various database types (such as SQLite, PostgreSQL, MySQL, etc.).
 
 ## 1. Download
 
@@ -135,9 +133,3 @@ https://dbeaver.io/download/
 ![alt text](docs/images/image-2.png)
 
 ![alt text](docs/images/image-3.png)
-
-## 3. Table Registration
-
-When using SQLAlchemy to automatically create database tables, calling create_tables() will only create tables for model classes that have been registered with Base. Only if these models (such as `from models import user, job`) are imported in main.py or other executed files, can SQLAlchemy "discover" these models and register them with Base. Otherwise, even if create_tables() is called, the corresponding tables will not be created.
-
-Therefore, be sure to import all model classes corresponding to the tables you need to create somewhere in your project (such as in `main.py` or a `router`). This ensures that create_tables() works properly and all tables are created as expected.

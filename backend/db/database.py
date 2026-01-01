@@ -17,8 +17,3 @@ def get_db():
         yield db
     finally:
         db.close()
-
-
-def create_tables():
-    from models import user, role, status, job, document 
-    Base.metadata.create_all(bind=engine)
