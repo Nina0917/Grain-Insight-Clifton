@@ -29,10 +29,17 @@ export default function UserModal({ open, mode, user, onClose, onSave }: Props) 
   const [email, setEmail] = useState("");
   const [roleId, setRoleId] = useState<UserItem["role_id"]>(2);
   const [statusId, setStatusId] = useState<UserItem["status_id"]>(1);
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   // autofill with original values when mode == edit
   useEffect(() => {
     if (!open) return;
+
+    setPassword("");
+    setError("");
+    setLoading(false);
 
     if (mode === "create") {
       setFirstName("");
@@ -55,23 +62,59 @@ export default function UserModal({ open, mode, user, onClose, onSave }: Props) 
   if (!open) return null;
 
   // to save all info of user
+  // function handleSave() {
+  //   const now = new Date().toISOString();
+  //   const newUser: UserItem = {
+  //     id: user?.id ?? Date.now(), // mock id if new
+  //     first_name: firstName.trim(),
+  //     last_name: lastName.trim(),
+  //     email: email.trim(),
+
+  //     role_id: roleId,
+  //     status_id: statusId,
+
+  //     // when create：create = update = now；edit: only update updated_at
+  //     created_at: mode === "create" ? now : (user?.created_at ?? now),
+  //     updated_at: now,
+  //   };
+  //   onSave(newUser);
+  // }
+
   function handleSave() {
+    setError("");
+
+    if (!firstName.trim()) 
+      return setError("First Name is required.");
+    if (!lastName.trim()) 
+      return setError("Last Name is required.");
+    if (!email.trim()) 
+      return setError("Email is required.");
+
+    if (mode === "create" && !password.trim()) {
+      return setError("Password is required for new user.");
+    }
+
+    setLoading(true);
+
     const now = new Date().toISOString();
-    const newUser: UserItem = {
-      id: user?.id ?? Date.now(), // mock id if new
+    const newUser: UserItem & { password?: string } = {
+      id: user?.id ?? Date.now(),
       first_name: firstName.trim(),
       last_name: lastName.trim(),
       email: email.trim(),
-
       role_id: roleId,
       status_id: statusId,
-
-      // when create：create = update = now；edit: only update updated_at
       created_at: mode === "create" ? now : (user?.created_at ?? now),
       updated_at: now,
-    };
-    onSave(newUser);
-  }
+      ...(password.trim() ? { password: password.trim() } : {}),
+  };
+
+  setTimeout(() => {
+    onSave(newUser as any);
+    setLoading(false);
+  }, 300);
+}
+
 // modal layout
   return (
     <div className="modal modal-open">
@@ -151,6 +194,32 @@ export default function UserModal({ open, mode, user, onClose, onSave }: Props) 
                 <option value={0}>Disabled</option>
               </select>
             </div>
+
+            <div>
+              <label className="label">
+                <span className="label-text">
+                  {mode === "create" ? "Password (required)" : "New Password (optional)"}
+                </span>
+              </label>
+              <input
+                className="input input-bordered w-full"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder={mode === "create" ? "Set initial password" : "Leave blank to keep unchanged"}
+              />
+            </div>
+            
+            {error && (
+              <div className="alert">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="stroke-info h-6 w-6 shrink-0">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                  </svg>
+                <span>{error}</span>
+              </div>
+            )}
+          
+
           </div>
         </div>
 
@@ -158,9 +227,10 @@ export default function UserModal({ open, mode, user, onClose, onSave }: Props) 
           <button className="btn" onClick={onClose}>
             Cancel
           </button>
-          <button className="btn btn-primary" onClick={handleSave}>
-            Save
+          <button className="btn btn-primary" onClick={handleSave} disabled={loading}>
+            {loading ? "Saving..." : "Save"}
           </button>
+
         </div>
       </div>
     </div>

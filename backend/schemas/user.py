@@ -2,7 +2,7 @@ from typing import List
 
 from pydantic import BaseModel
 
-
+from pydantic import BaseModel, ConfigDict
 class UserOut(BaseModel):
     id: int
     first_name: str
@@ -13,9 +13,9 @@ class UserOut(BaseModel):
     created_at: str
     updated_at: str
 
-    class Config:
-        orm_mode = True
-
+    # class Config:
+    #     orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 class GetAllUsersResponse(BaseModel):
     users: List[UserOut]

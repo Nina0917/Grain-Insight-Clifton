@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from core.config import settings
+from routers import user
 
 app = FastAPI(
     title="Grain Insight Clifton API",
@@ -10,7 +11,7 @@ app = FastAPI(
     docs_url="/docs",
     redoc_url="/redoc",
 )
-
+print("ALLOWED_ORIGINS from settings =", settings.ALLOWED_ORIGINS)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.ALLOWED_ORIGINS,
@@ -21,6 +22,7 @@ app.add_middleware(
 
 # app.include_router(story.router, prefix=settings.API_PREFIX)
 # app.include_router(job.router, prefix=settings.API_PREFIX)
+app.include_router(user.router, prefix=settings.API_PREFIX or "")
 
 if __name__ == "__main__":
     import uvicorn

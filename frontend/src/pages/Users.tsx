@@ -6,7 +6,7 @@
 //   );
 // }
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import UserModal, { UserItem } from "../components/UserModal";
 import "../index.css"
 
@@ -51,12 +51,64 @@ const MOCK_USERS: UserItem[] = [
 
 
 export default function Users() {
-  // use mock data at # 0
-  const [users, setUsers] = useState<UserItem[]>(MOCK_USERS);
+  // add access control
+  const raw = localStorage.getItem("auth_user");
+  const userParsed = raw ? JSON.parse(raw) : null;
 
+  if (!userParsed) {
+    // return <div className="p-6">Please login first.</div>;
+    return <div role="alert" className="alert alert-vertical sm:alert-horizontal">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="stroke-info h-6 w-6 shrink-0">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+      </svg>
+      <div>
+        <h3 className="font-bold">Login Required!</h3>
+        <div className="text-xs">Please Login to continue</div>
+      </div>
+      <button className="btn btn-sm">Log in</button>
+    </div>
+  }
+
+  if (userParsed.role_id !== 1) {
+    // return <div className="p-6">403: Admins only.</div>;
+        return <div role="alert" className="alert alert-vertical sm:alert-horizontal">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="stroke-info h-6 w-6 shrink-0">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+      </svg>
+      <div>
+        <h3 className="font-bold">No Authorization!</h3>
+        <div className="text-xs">Admins only</div>
+      </div>
+      <button className="btn btn-sm">Log in</button>
+    </div>
+  }
+  // use mock data at # 0
+  // const [users, setUsers] = useState<UserItem[]>(MOCK_USERS);
+  const [users, setUsers] = useState<UserItem[]>([]);
+  const [loading,setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useState<"edit" | "create">("edit");
   const [selected, setSelected] = useState<UserItem | null>(null);
+
+  async function loadUsers() {
+    setLoading(true);
+    setError("");
+    try {
+      const res = await fetch("http://localhost:8000/api/users/");
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      setUsers(data.users || []);
+      } catch (e: any) {
+        setError(e?.message || "Failed to load users");
+      } finally {
+        setLoading(false);
+      }
+  }
+
+  useEffect(() => {
+    loadUsers();
+  }, []);
 
   function openCreate() {
     setMode("create");
@@ -89,7 +141,13 @@ export default function Users() {
           + Create User
         </button>
       </div>
-      
+      {loading && <div className="alert mb-4">Loading users...</div>}
+      {error && (
+        <div className="alert alert-error mb-4">
+          <span>{error}</span>
+        </div>
+      )}
+
       <div className="overflow-x-auto bg-base-100 rounded-lg shadow">
         <table className="table">
           <thead>
@@ -138,13 +196,14 @@ export default function Users() {
                 </td>
                 <td className="text-right">
                   <button className="btn btn-sm" onClick={() => openEdit(u)}>
-                    Actions
+                    Edit
                   </button>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
+        
       </div>
 
       <UserModal
