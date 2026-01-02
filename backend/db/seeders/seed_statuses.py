@@ -8,6 +8,11 @@ def seed_statuses():
     statuses = [
         {"name": "Active", "description": "User is active"},
         {"name": "Inactive", "description": "User is inactive"},
+        {"name": "Uploaded", "description": "Document is uploaded to the system"},
+        {"name": "Uploaded Failed", "description": "Document upload failed"},
+        {"name": "Processing", "description": "Document is being processed"},
+        {"name": "Processed", "description": "Document has been processed"},
+        {"name": "Error", "description": "An error occurred during processing"},
     ]
 
     for s in statuses:
