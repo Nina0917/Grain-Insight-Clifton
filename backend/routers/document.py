@@ -1,23 +1,23 @@
-from fastapi import APIRouter, UploadFile, File, Depends
-from fastapi.responses import JSONResponse
-from sqlalchemy.orm import Session
-from db.database import get_db
-from models.status import Status
-from models.document import Document
 import os
 import uuid
 
+from fastapi import APIRouter, Depends, File, UploadFile
+from fastapi.responses import JSONResponse
+from sqlalchemy.orm import Session
+
+from db.database import get_db
+from models.document import Document
+from models.status import Status
+
 UPLOAD_DIR = "uploads/documents"
 
-router = APIRouter(
-    prefix="/documents",
-    tags=["documents"]
-)
+router = APIRouter(prefix="/documents", tags=["documents"])
+
 
 @router.post("/upload")
 async def upload_document(
-        file: UploadFile = File(...),
-        db: Session = Depends(get_db),
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
 ):
 
     # 1. 确保目录存在
@@ -28,7 +28,7 @@ async def upload_document(
     stored_filename = f"{uuid.uuid4()}{ext}"
     file_path = os.path.join(UPLOAD_DIR, stored_filename)
 
-     # 3. 流式保存文件到磁盘（重点）
+    # 3. 流式保存文件到磁盘（重点）
     with open(file_path, "wb") as buffer:
         while chunk := await file.read(1024 * 1024):
             buffer.write(chunk)
@@ -48,7 +48,7 @@ async def upload_document(
     db.add(document)
     db.commit()
     db.refresh(document)
-    
+
     return JSONResponse(
         content={
             "id": document.id,
