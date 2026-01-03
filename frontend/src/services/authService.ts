@@ -2,12 +2,10 @@ import axios from "axios";
 import { LoginResponse, UserInfo } from "../types/auth";
 import { tokenManager } from "../utils/tokenManager";
 
-// Backend API base URL
-const API_BASE_URL = "http://localhost:8000/api";
 
 // Create axios instance with default configuration
 const apiClient = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: "/api",
   headers: {
     "Content-Type": "application/json",
   },
@@ -51,10 +49,9 @@ export const authService = {
     const formData = new URLSearchParams();
     formData.append("username", email);
     formData.append("password", password);
-    formData.append("grant_type", "password");
-
+    
     const response = await axios.post<LoginResponse>(
-      `${API_BASE_URL}/auth/token`,
+      "/api/auth/token",
       formData,
       {
         headers: {

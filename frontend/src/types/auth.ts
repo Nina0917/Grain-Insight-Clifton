@@ -13,6 +13,7 @@ export interface UserInfo {
   last_name: string;
   email: string;
   role_id: number;
+  role_name?: string;
   status_id: number;
 }
 

@@ -1,11 +1,12 @@
 // Main App component with routing configuration
 
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { AuthProvider } from "./contexts/AuthContext";
-import { ProtectedRoute } from "./components/ProtectedRoute";
-import Login from "./pages/Login";
-import Dashboard from "./pages/Dashboard";
-import Users from "./pages/Users";
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import AppLayout from "./layouts/AppLayout";
+import { AuthProvider } from './contexts/AuthContext';
+import { ProtectedRoute } from './components/ProtectedRoute';
+import Login from './pages/Login';
+import Dashboard from './pages/Dashboard';
+import Users from './pages/Users';
 
 function App() {
   return (
@@ -15,7 +16,7 @@ function App() {
         <Routes>
           {/* Public route - Login page */}
           <Route path="/login" element={<Login />} />
-
+          
           {/* Protected route - Dashboard (requires authentication) */}
           <Route
             path="/dashboard"
@@ -25,7 +26,7 @@ function App() {
               </ProtectedRoute>
             }
           />
-
+          
           {/* Protected route - Users page (requires admin role) */}
           <Route
             path="/users"
@@ -35,7 +36,7 @@ function App() {
               </ProtectedRoute>
             }
           />
-
+          
           {/* Redirect root to dashboard */}
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
         </Routes>
