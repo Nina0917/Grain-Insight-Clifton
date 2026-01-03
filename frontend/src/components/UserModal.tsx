@@ -61,25 +61,6 @@ export default function UserModal({ open, mode, user, onClose, onSave }: Props) 
 
   if (!open) return null;
 
-  // to save all info of user
-  // function handleSave() {
-  //   const now = new Date().toISOString();
-  //   const newUser: UserItem = {
-  //     id: user?.id ?? Date.now(), // mock id if new
-  //     first_name: firstName.trim(),
-  //     last_name: lastName.trim(),
-  //     email: email.trim(),
-
-  //     role_id: roleId,
-  //     status_id: statusId,
-
-  //     // when create：create = update = now；edit: only update updated_at
-  //     created_at: mode === "create" ? now : (user?.created_at ?? now),
-  //     updated_at: now,
-  //   };
-  //   onSave(newUser);
-  // }
-
   function handleSave() {
     setError("");
 

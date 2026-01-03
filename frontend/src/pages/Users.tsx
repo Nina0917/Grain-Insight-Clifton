@@ -1,60 +1,13 @@
-// export default function Users() {
-//   return (
-//     <div>
-//       <h1 className="text-2xl font-bold mb-4">Users</h1>
-//     </div>
-//   );
-// }
-
 import { useEffect, useState } from "react";
 import UserModal, { UserItem } from "../components/UserModal";
 import "../index.css"
-
-// mock data for testing
-const MOCK_USERS_SIMPLE: UserItem[] = [
-  { id: 1, first_name: "Nina", last_name: "Ma", email: "nina@example.com", role_id: 1, status_id: 1, created_at:"2025", updated_at: "2025"},
-  { id: 2, first_name: "Jia", last_name: "Tong", email: "jia@example.com", role_id: 2, status_id: 0, created_at:"2026", updated_at: "2025"},
-  { id: 3, first_name: "Run", last_name: "Lin", email: "run@example.com", role_id: 2, status_id: 0, created_at:"2024", updated_at: "2028"},
-];
-const MOCK_USERS: UserItem[] = [
-  {
-    id: 1,
-    first_name: "Alice",
-    last_name: "Wang",
-    email: "alice.wang@example.com",
-    status_id: 1, // 1 = active
-    role_id: 1,   // 1 = admin
-    created_at: "2024-01-10 09:15:00",
-    updated_at: "2024-01-10 09:15:00",
-  },
-  {
-    id: 2,
-    first_name: "Bob",
-    last_name: "Li",
-    email: "bob.li@example.com",
-    status_id: 1, // active
-    role_id: 2,   // user
-    created_at: "2024-02-03 14:30:00",
-    updated_at: "2024-02-05 10:12:00",
-  },
-  {
-    id: 3,
-    first_name: "Cathy",
-    last_name: "Zhang",
-    email: "cathy.zhang@example.com",
-    status_id: 0, // disabled
-    role_id: 2,   // user
-    created_at: "2024-03-01 08:45:00",
-    updated_at: "2024-03-20 16:20:00",
-  },
-];
-
 
 export default function Users() {
   // add access control
   const raw = localStorage.getItem("auth_user");
   const userParsed = raw ? JSON.parse(raw) : null;
 
+  // status #1 not logged in
   if (!userParsed) {
     // return <div className="p-6">Please login first.</div>;
     return <div role="alert" className="alert alert-vertical sm:alert-horizontal">
@@ -68,10 +21,10 @@ export default function Users() {
       <button className="btn btn-sm">Log in</button>
     </div>
   }
-
+  // status #2 logged in with regular user
   if (userParsed.role_id !== 1) {
     // return <div className="p-6">403: Admins only.</div>;
-        return <div role="alert" className="alert alert-vertical sm:alert-horizontal">
+    return <div role="alert" className="alert alert-vertical sm:alert-horizontal">
       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="stroke-info h-6 w-6 shrink-0">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
       </svg>
@@ -82,6 +35,9 @@ export default function Users() {
       <button className="btn btn-sm">Log in</button>
     </div>
   }
+
+  // status #3 logged in with admin
+
   // use mock data at # 0
   // const [users, setUsers] = useState<UserItem[]>(MOCK_USERS);
   const [users, setUsers] = useState<UserItem[]>([]);
@@ -96,7 +52,8 @@ export default function Users() {
     setError("");
     try {
       const res = await fetch("http://localhost:8000/api/users/");
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      if (!res.ok) 
+        throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       setUsers(data.users || []);
       } catch (e: any) {
@@ -107,6 +64,16 @@ export default function Users() {
   }
 
   useEffect(() => {
+    //FOR TESTE: mock admin
+    localStorage.setItem(
+      "auth_user",
+      JSON.stringify({
+        id: 1,
+        email: "admin@example.com",
+        role_id: 1
+      })
+    );
+    //FOR TEST: mock admin
     loadUsers();
   }, []);
 
@@ -122,15 +89,64 @@ export default function Users() {
     setOpen(true);
   }
 
-  function handleSave(newUser: UserItem) {
-    // edit frontend mock data first
-    if (mode === "create") {
-      setUsers([newUser, ...users]);
-    } else {
-      setUsers(users.map((u) => (u.id === newUser.id ? newUser : u)));
+  async function handleSave(payload: any) {
+    try {
+      if (mode === "create") {
+        const res = await fetch("http://localhost:8000/api/users/", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            first_name: payload.first_name,
+            last_name: payload.last_name,
+            email: payload.email,
+            password: payload.password,
+            role_id: payload.role_id,
+            status_id: payload.status_id,
+          }),
+        });
+
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err?.detail || `HTTP ${res.status}`);
+        }
+      }
+
+
+      if (mode === "edit") {
+        const body: any = {
+          first_name: payload.first_name,
+          last_name: payload.last_name,
+          email: payload.email,
+          role_id: payload.role_id,
+          status_id: payload.status_id,
+        };
+
+        // passsword is optional
+        if (payload.password && payload.password.trim()) {
+          body.password = payload.password.trim();
+        }
+
+        const res = await fetch(`http://localhost:8000/api/users/${payload.id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err?.detail || `HTTP ${res.status}`);
+        }
+      }
+
+      
+      setOpen(false);
+      await loadUsers();
+
+    } catch (e: any) {
+      alert(e?.message || "Save failed");
     }
-    setOpen(false);
   }
+
 
   // users page layout
   return (
