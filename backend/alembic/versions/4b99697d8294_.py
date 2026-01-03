@@ -1,8 +1,8 @@
-"""initial migration
+"""empty message
 
-Revision ID: f18db426fcc6
+Revision ID: 4b99697d8294
 Revises:
-Create Date: 2025-12-31 10:12:42.151978
+Create Date: 2025-12-31 19:31:34.386665
 
 """
 
@@ -13,7 +13,7 @@ import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision: str = "f18db426fcc6"
+revision: str = "4b99697d8294"
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -77,13 +77,20 @@ def upgrade() -> None:
         "documents",
         sa.Column("id", sa.Integer(), nullable=False),
         sa.Column("user_id", sa.Integer(), nullable=False),
-        sa.Column("file_name", sa.String(length=255), nullable=False),
+        sa.Column("status_id", sa.Integer(), nullable=False),
+        sa.Column("original_filename", sa.String(length=255), nullable=False),
+        sa.Column("stored_filename", sa.String(length=255), nullable=False),
         sa.Column("file_path", sa.String(length=512), nullable=False),
+        sa.Column("content_type", sa.String(length=100), nullable=False),
         sa.Column(
             "uploaded_at",
             sa.DateTime(timezone=True),
             server_default=sa.text("(CURRENT_TIMESTAMP)"),
             nullable=False,
+        ),
+        sa.ForeignKeyConstraint(
+            ["status_id"],
+            ["statuses.id"],
         ),
         sa.ForeignKeyConstraint(
             ["user_id"],
