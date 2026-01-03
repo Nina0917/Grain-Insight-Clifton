@@ -70,9 +70,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
    * Check if current user is an admin
    * @returns true if user is admin, false otherwise
    */
-   const isAdmin = () => {
-    return user?.role_name === "Admin"; 
-   };
+  const isAdmin = () => {
+    return user?.role_name === "Admin";
+  };
 
   // Context value to be provided to children
   const value: AuthContextType = {

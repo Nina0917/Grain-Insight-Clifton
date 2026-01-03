@@ -1,4 +1,5 @@
 from pydantic import BaseModel, EmailStr
+from typing import Optional
 
 
 class LoginRequest(BaseModel):
@@ -27,6 +28,7 @@ class UserInfo(BaseModel):
     last_name: str
     email: str
     role_id: int
+    role_name: Optional[str] = None
     status_id: int
 
     class Config:

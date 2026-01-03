@@ -1,9 +1,10 @@
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.orm import Session
-
+from sqlalchemy.orm import joinedload
 from core.security import decode_access_token
 from db.database import get_db
+from models.role import Role
 from models.user import User
 
 # HTTP Bearer token scheme
@@ -36,7 +37,13 @@ def get_current_user(
         )
 
     # Query user from database
-    user = db.query(User).filter(User.id == user_id).first()
+    user = (
+            db.query(User)
+            .options(joinedload(User.role)) 
+            .filter(User.id == user_id)
+            .first()
+    )
+    
     if user is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -47,10 +54,21 @@ def get_current_user(
     return user
 
 
-def require_admin(current_user: User = Depends(get_current_user)) -> User:
-    """Require user to be admin (role_id = 1, assuming 1 is admin)"""
-    if current_user.role_id != 1:  # Assuming role_id 1 is admin
+def require_admin(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)) -> User:
+    """Require user to be admin"""
+    # Query admin role from database
+    role_admin = db.query(Role).filter(Role.name == "Admin").first()
+    
+    if not role_admin:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail="Admin access required"
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Admin role not found in database"
         )
+    
+    if current_user.role_id != role_admin.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admin access required"
+        )
+    
     return current_user

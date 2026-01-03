@@ -2,7 +2,6 @@ import axios from "axios";
 import { LoginResponse, UserInfo } from "../types/auth";
 import { tokenManager } from "../utils/tokenManager";
 
-
 // Create axios instance with default configuration
 const apiClient = axios.create({
   baseURL: "/api",
@@ -49,7 +48,7 @@ export const authService = {
     const formData = new URLSearchParams();
     formData.append("username", email);
     formData.append("password", password);
-    
+
     const response = await axios.post<LoginResponse>(
       "/api/auth/token",
       formData,

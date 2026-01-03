@@ -16,6 +16,13 @@ class Settings(BaseSettings):
 
     OPENAI_API_KEY: str
 
+    # JWT Configuration
+    SECRET_KEY: str
+
+    ALGORITHM: str = "HS256"
+    
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+
     def __init__(self, **values):
         super().__init__(**values)
         if not self.DEBUG:

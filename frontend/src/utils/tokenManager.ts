@@ -14,17 +14,17 @@ export const tokenManager = {
    */
   getToken(): string | null {
     const token = sessionStorage.getItem(TOKEN_KEY);
-    
+
     if (!token) {
       return null;
     }
-    
+
     // Check if token is expired
     if (this.isTokenExpired(token)) {
       this.removeToken();
       return null;
     }
-    
+
     return token;
   },
 
@@ -34,18 +34,18 @@ export const tokenManager = {
   isTokenExpired(token: string): boolean {
     try {
       // Parse JWT payload (format: header.payload.signature)
-      const base64Url = token.split('.')[1];
-      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const base64Url = token.split(".")[1];
+      const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
       const payload = JSON.parse(window.atob(base64));
-      
+
       // Get expiration time (in seconds) and convert to milliseconds
       const exp = payload.exp * 1000;
-      
+
       // Check if current time is past expiration
       return Date.now() >= exp;
     } catch (error) {
-      console.error('Error parsing token:', error);
-      return true; 
+      console.error("Error parsing token:", error);
+      return true;
     }
   },
 
@@ -69,22 +69,22 @@ export const tokenManager = {
    */
   getTokenTimeRemaining(): number | null {
     const token = sessionStorage.getItem(TOKEN_KEY);
-    
+
     if (!token) {
       return null;
     }
-    
+
     try {
-      const base64Url = token.split('.')[1];
-      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const base64Url = token.split(".")[1];
+      const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
       const payload = JSON.parse(window.atob(base64));
       const exp = payload.exp * 1000;
       const remaining = exp - Date.now();
-      
+
       if (remaining <= 0) {
         return null;
       }
-      
+
       return Math.floor(remaining / 1000 / 60); // return minutes
     } catch (error) {
       return null;

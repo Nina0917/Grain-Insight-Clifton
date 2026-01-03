@@ -1,10 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload 
 
 from core.dependencies import get_current_user
 from core.security import create_access_token, verify_password
 from db.database import get_db
+from models.status import Status
 from models.user import User
 from schemas.auth import LoginResponse, UserInfo
 
@@ -19,8 +20,13 @@ async def login(
 ):
     """Authenticate user and return JWT token"""
 
-    # 1. Find user by email (OAuth2 uses 'username' field for email)
-    user = db.query(User).filter(User.email == form_data.username).first()
+    # 1. Find user by email
+    user = (
+        db.query(User)
+        .options(joinedload(User.role)) 
+        .filter(User.email == form_data.username)
+        .first()
+    )
 
     # 2. Verify user exists
     if not user:
@@ -38,10 +44,19 @@ async def login(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    # 4. Check user status (assuming status_id=1 is active)
-    if user.status_id != 1:
+    # 4. Check user status - query from database
+    status_active = db.query(Status).filter(Status.name == "Active").first()
+    
+    if not status_active:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail="Account is not active"
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Active status not found in database"
+        )
+    
+    if user.status_id != status_active.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Account is not active"
         )
 
     # 5. Generate JWT token
@@ -49,7 +64,7 @@ async def login(
         data={"sub": str(user.id), "email": user.email, "role_id": user.role_id}
     )
 
-    # 6. Return token and user information
+    # 6. Return token and user information with role_name
     return LoginResponse(
         access_token=access_token,
         token_type="bearer",
@@ -59,6 +74,7 @@ async def login(
             "last_name": user.last_name,
             "email": user.email,
             "role_id": user.role_id,
+            "role_name": user.role.name if user.role else None,
             "status_id": user.status_id,
         },
     )
@@ -73,5 +89,6 @@ def get_current_user_info(current_user: User = Depends(get_current_user)):
         last_name=current_user.last_name,
         email=current_user.email,
         role_id=current_user.role_id,
+        role_name=current_user.role.name if current_user.role else None, 
         status_id=current_user.status_id,
     )
