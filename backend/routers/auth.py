@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from sqlalchemy.orm import Session, joinedload 
+from sqlalchemy.orm import Session, joinedload
 
 from core.dependencies import get_current_user
 from core.security import create_access_token, verify_password
@@ -23,7 +23,7 @@ async def login(
     # 1. Find user by email
     user = (
         db.query(User)
-        .options(joinedload(User.role)) 
+        .options(joinedload(User.role))
         .filter(User.email == form_data.username)
         .first()
     )
@@ -46,17 +46,16 @@ async def login(
 
     # 4. Check user status - query from database
     status_active = db.query(Status).filter(Status.name == "Active").first()
-    
+
     if not status_active:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Active status not found in database"
+            detail="Active status not found in database",
         )
-    
+
     if user.status_id != status_active.id:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Account is not active"
+            status_code=status.HTTP_403_FORBIDDEN, detail="Account is not active"
         )
 
     # 5. Generate JWT token
@@ -89,6 +88,6 @@ def get_current_user_info(current_user: User = Depends(get_current_user)):
         last_name=current_user.last_name,
         email=current_user.email,
         role_id=current_user.role_id,
-        role_name=current_user.role.name if current_user.role else None, 
+        role_name=current_user.role.name if current_user.role else None,
         status_id=current_user.status_id,
     )
