@@ -36,7 +36,7 @@ async def upload_document(
 
     # Create document record in database
     document = Document(
-        user_id=1, # In a real app, get the user ID from the authenticated user
+        user_id=1,  # In a real app, get the user ID from the authenticated user
         original_filename=file.filename,
         stored_filename=stored_filename,
         file_path=file_path,
