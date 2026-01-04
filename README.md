@@ -24,12 +24,14 @@ uv sync
 ```
 ### Configure Environment Variables
 Copy the example environment file:
-   cd backend
-   cp .env.example .env
-
+```
+cd backend
+cp .env.example .env
+```
 Generate a secure JWT SECRET_KEY:
-   python -c "import secrets; print(secrets.token_hex(32))"
-
+```
+python -c "import secrets; print(secrets.token_hex(32))"
+```
 Update your .env file with the generated key
 ### Config interpretor
 
