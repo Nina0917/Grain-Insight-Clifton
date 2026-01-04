@@ -20,24 +20,23 @@ async def upload_document(
     db: Session = Depends(get_db),
 ):
 
-    # 1. 确保目录存在
+    # Ensure upload directory exists
     os.makedirs(UPLOAD_DIR, exist_ok=True)
 
-    # 2. 生成安全的文件名
     ext = os.path.splitext(file.filename)[1]
     stored_filename = f"{uuid.uuid4()}{ext}"
     file_path = os.path.join(UPLOAD_DIR, stored_filename)
 
-    # 3. 流式保存文件到磁盘（重点）
+    # Save file to disk
     with open(file_path, "wb") as buffer:
         while chunk := await file.read(1024 * 1024):
             buffer.write(chunk)
 
     uploaded_status = db.query(Status).filter(Status.name == "Uploaded").first()
 
-    # 4. 创建 document 记录
+    # Create document record in database
     document = Document(
-        user_id=1,  # TODO: 替换为实际用户 ID
+        user_id=1,  # In a real app, get the user ID from the authenticated user
         original_filename=file.filename,
         stored_filename=stored_filename,
         file_path=file_path,

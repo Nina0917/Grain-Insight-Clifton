@@ -1,4 +1,5 @@
 from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
+from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
 from db.database import Base
@@ -14,6 +15,9 @@ class User(Base):
     password = Column(String(255), nullable=False)
     status_id = Column(Integer, ForeignKey("statuses.id"), nullable=False)
     role_id = Column(Integer, ForeignKey("roles.id"), nullable=False)
+
+    role = relationship("Role", back_populates="users")
+    status = relationship("Status", back_populates="users")
     created_at = Column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )

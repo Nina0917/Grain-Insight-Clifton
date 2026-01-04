@@ -1,26 +1,49 @@
-// src/App.tsx
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+// Main App component with routing configuration
 
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import AppLayout from "./layouts/AppLayout";
+import { AuthProvider } from "./contexts/AuthContext";
+import { ProtectedRoute } from "./components/ProtectedRoute";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Users from "./pages/Users";
 import Documents from "./pages/Documents";
 
-export default function App() {
+function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        {/* ❌ Login Page: No Navbar */}
-        <Route path="/login" element={<Login />} />
+      {/* Wrap app with AuthProvider to provide auth state globally */}
+      <AuthProvider>
+        <Routes>
+          {/* Public route - Login page */}
+          <Route path="/login" element={<Login />} />
 
-        {/* ✅ Other Pages: With Navbar */}
-        <Route element={<AppLayout />}>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/users" element={<Users />} />
-          <Route path="/documents" element={<Documents />} />
-        </Route>
-      </Routes>
+          {/* Protected route - Dashboard (requires authentication) */}
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Protected route - Users page (requires admin role) */}
+          <Route
+            path="/users"
+            element={
+              <ProtectedRoute requireAdmin={true}>
+                <Users />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Redirect root to dashboard */}
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        </Routes>
+      </AuthProvider>
     </BrowserRouter>
   );
 }
+
+export default App;
