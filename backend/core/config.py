@@ -23,6 +23,13 @@ class Settings(BaseSettings):
 
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
 
+    # File Upload Configuration
+    UPLOAD_DIR: str = "uploads/documents"
+
+    MAX_FILE_SIZE: int = 10485760  # 10MB in bytes
+
+    ALLOWED_EXTENSIONS: str = ".pdf,.doc,.docx,.txt,.png,.jpg,.jpeg"
+
     def __init__(self, **values):
         super().__init__(**values)
         if not self.DEBUG:
