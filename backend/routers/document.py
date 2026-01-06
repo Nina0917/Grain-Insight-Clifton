@@ -1,16 +1,16 @@
 import os
 import uuid
 
-from fastapi import APIRouter, Depends, File, UploadFile, HTTPException
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 
 from core.config import settings
 from core.dependencies import get_current_user
 from db.database import get_db
-from models.user import User
 from models.document import Document
 from models.status import Status
+from models.user import User
 
 router = APIRouter(prefix="/documents", tags=["documents"])
 
