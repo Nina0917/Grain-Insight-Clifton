@@ -8,9 +8,12 @@ from schemas.user import UserUpdate, UserCreate, GetAllUsersResponse, UserOut
 from datetime import datetime
 
 from core.security import get_password_hash
+from core.dependencies import require_admin
 
 # api object defineds everything starts with /users and categorized as users
-router = APIRouter(prefix="/users", tags=["users"])
+# router = APIRouter(prefix="/users", tags=["users"])
+# add admin required gate
+router = APIRouter(prefix="/users", tags=["users"], dependencies=[Depends(require_admin)])
 
 # # http://localhost:8000/api/users/
 # @router.get("/", response_model=GetAllUsersResponse)
