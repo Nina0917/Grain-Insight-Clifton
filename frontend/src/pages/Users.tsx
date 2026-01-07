@@ -6,7 +6,7 @@ import "../index.css"
 import { tokenManager } from "../utils/tokenManager";
 
 export default function Users() {
-  // // add access control
+  // // add access control on front end
   // const raw = localStorage.getItem("auth_user");
   // const userParsed = raw ? JSON.parse(raw) : null;
 
@@ -194,18 +194,6 @@ export default function Users() {
         <table className="table">
           <thead>
             <tr>
-              {/* this the application for the select all checkbox */}
-              {/*<th>
-                <label className="inline-flex items-center gap-2">
-                  <input 
-                    type="checkbox"
-                    className="checkbox"
-                    checked={isAllSelected}
-                    onChange={toggleAll}
-                  />
-                  <span>All</span>
-                </label>
-              </th>*/}
               <th>Name</th>
               <th>Email</th>
               <th>Role(s)</th>
@@ -217,15 +205,6 @@ export default function Users() {
           <tbody>
             {users.map((u) => (
               <tr key={u.id}>
-                {/* this the application for the select all checkbox */}
-                {/* <td>
-                  <input
-                    type="checkbox"
-                    className="checkbox"
-                    checked={selectedIds.has(u.id)}
-                    onChange={() => toggleOne(u.id)}
-                  />
-                  </td> */}
                 <td>{u.first_name}{" "}{u.last_name}</td>
                 <td>{u.email}</td>
                 <td>

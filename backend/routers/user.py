@@ -11,15 +11,8 @@ from core.security import get_password_hash
 from core.dependencies import require_admin
 
 # api object defineds everything starts with /users and categorized as users
-# router = APIRouter(prefix="/users", tags=["users"])
 # add admin required gate
 router = APIRouter(prefix="/users", tags=["users"], dependencies=[Depends(require_admin)])
-
-# # http://localhost:8000/api/users/
-# @router.get("/", response_model=GetAllUsersResponse)
-# def get_all_users(db: Session = Depends(get_db)):
-#     users = db.query(User).all()
-#     return GetAllUsersResponse(users=users)
 
 # test for ORM TO Pydantic transformation
 @router.get("/", response_model=GetAllUsersResponse)
@@ -42,24 +35,6 @@ def get_all_users(db: Session = Depends(get_db)):
         ]
     )
 
-
-# # http://localhost:8000/api/users/1
-# @router.get("/{user_id}", response_model=UserOut)
-# def get_user(user_id: int, db: Session = Depends(get_db)):
-#     user = db.query(User).filter(User.id == user_id).first()
-#     if not user:
-#         raise HTTPException(status_code=404, detail="User not found")
-
-#     return UserOut(
-#         id=user.id,
-#         first_name=user.first_name,
-#         last_name=user.last_name,
-#         email=user.email,
-#         status_id=user.status_id,
-#         role_id=user.role_id,
-#         created_at=user.created_at.isoformat(),
-#         updated_at=user.updated_at.isoformat(),
-#     )
 
 # create new user
 @router.post("/", response_model=UserOut)
@@ -96,6 +71,7 @@ def create_user(payload: UserCreate, db: Session = Depends(get_db)):
         updated_at=user.updated_at.isoformat() if user.updated_at else None,
     )
 
+# update user
 @router.patch("/{user_id}", response_model=UserOut)
 def update_user(user_id: int, payload: UserUpdate, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.id == user_id).first()
