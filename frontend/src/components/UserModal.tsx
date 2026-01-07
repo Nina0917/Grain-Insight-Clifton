@@ -14,7 +14,6 @@ export type UserItem = {
   updated_at: string;
 };
 
-
 type Props = {
   open: boolean;
   mode: "edit" | "create";
@@ -23,7 +22,13 @@ type Props = {
   onSave: (user: UserItem) => void;
 };
 
-export default function UserModal({ open, mode, user, onClose, onSave }: Props) {
+export default function UserModal({
+  open,
+  mode,
+  user,
+  onClose,
+  onSave,
+}: Props) {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
@@ -64,12 +69,9 @@ export default function UserModal({ open, mode, user, onClose, onSave }: Props) 
   function handleSave() {
     setError("");
 
-    if (!firstName.trim()) 
-      return setError("First Name is required.");
-    if (!lastName.trim()) 
-      return setError("Last Name is required.");
-    if (!email.trim()) 
-      return setError("Email is required.");
+    if (!firstName.trim()) return setError("First Name is required.");
+    if (!lastName.trim()) return setError("Last Name is required.");
+    if (!email.trim()) return setError("Email is required.");
 
     if (mode === "create" && !password.trim()) {
       return setError("Password is required for new user.");
@@ -88,15 +90,15 @@ export default function UserModal({ open, mode, user, onClose, onSave }: Props) 
       created_at: mode === "create" ? now : (user?.created_at ?? now),
       updated_at: now,
       ...(password.trim() ? { password: password.trim() } : {}),
-  };
+    };
 
-  setTimeout(() => {
-    onSave(newUser as any);
-    setLoading(false);
-  }, 300);
-}
+    setTimeout(() => {
+      onSave(newUser as any);
+      setLoading(false);
+    }, 300);
+  }
 
-// modal layout
+  // modal layout
   return (
     <div className="modal modal-open">
       <div className="modal-box">
@@ -155,7 +157,9 @@ export default function UserModal({ open, mode, user, onClose, onSave }: Props) 
               <select
                 className="select select-bordered w-full"
                 value={roleId}
-                onChange={(e) => setRoleId(Number(e.target.value) as UserItem["role_id"])}
+                onChange={(e) =>
+                  setRoleId(Number(e.target.value) as UserItem["role_id"])
+                }
               >
                 <option value={1}>Admin</option>
                 <option value={2}>Regular</option>
@@ -169,7 +173,9 @@ export default function UserModal({ open, mode, user, onClose, onSave }: Props) 
               <select
                 className="select select-bordered w-full"
                 value={statusId}
-                onChange={(e) => setStatusId(Number(e.target.value) as UserItem["status_id"])}
+                onChange={(e) =>
+                  setStatusId(Number(e.target.value) as UserItem["status_id"])
+                }
               >
                 <option value={1}>Active</option>
                 <option value={0}>Disabled</option>
@@ -179,7 +185,9 @@ export default function UserModal({ open, mode, user, onClose, onSave }: Props) 
             <div>
               <label className="label">
                 <span className="label-text">
-                  {mode === "create" ? "Password (required)" : "New Password (optional)"}
+                  {mode === "create"
+                    ? "Password (required)"
+                    : "New Password (optional)"}
                 </span>
               </label>
               <input
@@ -187,20 +195,32 @@ export default function UserModal({ open, mode, user, onClose, onSave }: Props) 
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder={mode === "create" ? "Set initial password" : "Leave blank to keep unchanged"}
+                placeholder={
+                  mode === "create"
+                    ? "Set initial password"
+                    : "Leave blank to keep unchanged"
+                }
               />
             </div>
-            
+
             {error && (
               <div className="alert">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="stroke-info h-6 w-6 shrink-0">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                  </svg>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  className="stroke-info h-6 w-6 shrink-0"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  ></path>
+                </svg>
                 <span>{error}</span>
               </div>
             )}
-          
-
           </div>
         </div>
 
@@ -208,10 +228,13 @@ export default function UserModal({ open, mode, user, onClose, onSave }: Props) 
           <button className="btn" onClick={onClose}>
             Cancel
           </button>
-          <button className="btn btn-primary" onClick={handleSave} disabled={loading}>
+          <button
+            className="btn btn-primary"
+            onClick={handleSave}
+            disabled={loading}
+          >
             {loading ? "Saving..." : "Save"}
           </button>
-
         </div>
       </div>
     </div>

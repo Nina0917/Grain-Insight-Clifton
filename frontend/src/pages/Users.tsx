@@ -2,7 +2,7 @@ import Navbar from "../components/Navbar";
 
 import { useEffect, useState } from "react";
 import UserModal, { UserItem } from "../components/UserModal";
-import "../index.css"
+import "../index.css";
 import { tokenManager } from "../utils/tokenManager";
 
 export default function Users() {
@@ -45,23 +45,23 @@ export default function Users() {
   // use mock data at # 0
   // const [users, setUsers] = useState<UserItem[]>(MOCK_USERS);
   const [users, setUsers] = useState<UserItem[]>([]);
-  const [loading,setLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useState<"edit" | "create">("edit");
   const [selected, setSelected] = useState<UserItem | null>(null);
-  
-  function getAuthHeaders(extra?: Record<string, string>) {
-  const token = tokenManager.getToken();
-  if (!token) {
-    throw new Error("No access token. Please login again.");
-  }
 
-  return {
-    Authorization: `Bearer ${token}`,
-    ...(extra ?? {}),
-  };
-}
+  function getAuthHeaders(extra?: Record<string, string>) {
+    const token = tokenManager.getToken();
+    if (!token) {
+      throw new Error("No access token. Please login again.");
+    }
+
+    return {
+      Authorization: `Bearer ${token}`,
+      ...(extra ?? {}),
+    };
+  }
 
   async function loadUsers() {
     setLoading(true);
@@ -70,15 +70,14 @@ export default function Users() {
       const res = await fetch("http://localhost:8000/api/users/", {
         headers: getAuthHeaders(),
       });
-      if (!res.ok) 
-        throw new Error(`HTTP ${res.status}`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       setUsers(data.users || []);
-      } catch (e: any) {
-        setError(e?.message || "Failed to load users");
-      } finally {
-        setLoading(false);
-      }
+    } catch (e: any) {
+      setError(e?.message || "Failed to load users");
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => {
@@ -129,7 +128,6 @@ export default function Users() {
         }
       }
 
-
       if (mode === "edit") {
         const body: any = {
           first_name: payload.first_name,
@@ -144,11 +142,14 @@ export default function Users() {
           body.password = payload.password.trim();
         }
 
-        const res = await fetch(`http://localhost:8000/api/users/${payload.id}`, {
-          method: "PATCH",
-          headers: getAuthHeaders({ "Content-Type": "application/json" }),
-          body: JSON.stringify(body),
-        });
+        const res = await fetch(
+          `http://localhost:8000/api/users/${payload.id}`,
+          {
+            method: "PATCH",
+            headers: getAuthHeaders({ "Content-Type": "application/json" }),
+            body: JSON.stringify(body),
+          }
+        );
 
         if (!res.ok) {
           const err = await res.json().catch(() => ({}));
@@ -156,15 +157,12 @@ export default function Users() {
         }
       }
 
-      
       setOpen(false);
       await loadUsers();
-
     } catch (e: any) {
       alert(e?.message || "Save failed");
     }
   }
-
 
   // users page layout
   return (
@@ -176,66 +174,70 @@ export default function Users() {
         <p className="mt-4">This page is only accessible to Admins.</p>
       </div> */}
 
-    <div className="p-6">
-      <div className="flex items-center justify-between mb-4">
-        <h1 className="text-2xl font-bold">Users</h1>
-        <button className="btn btn-primary" onClick={openCreate}>
-          + Create User
-        </button>
-      </div>
-      {loading && <div className="alert mb-4">Loading users...</div>}
-      {error && (
-        <div className="alert alert-error mb-4">
-          <span>{error}</span>
+      <div className="p-6">
+        <div className="flex items-center justify-between mb-4">
+          <h1 className="text-2xl font-bold">Users</h1>
+          <button className="btn btn-primary" onClick={openCreate}>
+            + Create User
+          </button>
         </div>
-      )}
+        {loading && <div className="alert mb-4">Loading users...</div>}
+        {error && (
+          <div className="alert alert-error mb-4">
+            <span>{error}</span>
+          </div>
+        )}
 
-      <div className="overflow-x-auto bg-base-100 rounded-lg shadow">
-        <table className="table">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Email</th>
-              <th>Role(s)</th>
-              <th>Status</th>
-              <th className="text-right">Actions</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {users.map((u) => (
-              <tr key={u.id}>
-                <td>{u.first_name}{" "}{u.last_name}</td>
-                <td>{u.email}</td>
-                <td>
-                  <span className="badge badge-outline">{u.role_id === 1 ? "Admin" : "Regular"}</span>
-                </td>
-                <td>
-                  <span className={`badge ${u.status_id === 1 ? "badge-success" : "badge-ghost"}`}>
-                    {u.status_id === 1 ? "Active" : "Disable"}
-                  </span>
-                </td>
-                <td className="text-right">
-                  <button className="btn btn-sm" onClick={() => openEdit(u)}>
-                    Edit
-                  </button>
-                </td>
+        <div className="overflow-x-auto bg-base-100 rounded-lg shadow">
+          <table className="table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Role(s)</th>
+                <th>Status</th>
+                <th className="text-right">Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-        
-      </div>
+            </thead>
 
-      <UserModal
-        open={open}
-        mode={mode}
-        user={selected}
-        onClose={() => setOpen(false)}
-        onSave={handleSave}
-      />
-    </div>
+            <tbody>
+              {users.map((u) => (
+                <tr key={u.id}>
+                  <td>
+                    {u.first_name} {u.last_name}
+                  </td>
+                  <td>{u.email}</td>
+                  <td>
+                    <span className="badge badge-outline">
+                      {u.role_id === 1 ? "Admin" : "Regular"}
+                    </span>
+                  </td>
+                  <td>
+                    <span
+                      className={`badge ${u.status_id === 1 ? "badge-success" : "badge-ghost"}`}
+                    >
+                      {u.status_id === 1 ? "Active" : "Disable"}
+                    </span>
+                  </td>
+                  <td className="text-right">
+                    <button className="btn btn-sm" onClick={() => openEdit(u)}>
+                      Edit
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        <UserModal
+          open={open}
+          mode={mode}
+          user={selected}
+          onClose={() => setOpen(false)}
+          onSave={handleSave}
+        />
+      </div>
     </div>
   );
 }
-

@@ -31,13 +31,19 @@ export default function Dashboard() {
                 {isAdmin() ? "Admin" : "User"}
               </span>
             </div>
-              <div className="mt-6 flex gap-3">
-              <button className="btn btn-primary" onClick={() => navigate("/documents")}>
+            <div className="mt-6 flex gap-3">
+              <button
+                className="btn btn-primary"
+                onClick={() => navigate("/documents")}
+              >
                 Manage Files
               </button>
 
               {isAdmin() && (
-                <button className="btn btn-primary" onClick={() => navigate("/users")}>
+                <button
+                  className="btn btn-primary"
+                  onClick={() => navigate("/users")}
+                >
                   Manage Users
                 </button>
               )}
