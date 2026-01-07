@@ -1,18 +1,20 @@
+from datetime import datetime
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
+from core.dependencies import require_admin
+from core.security import get_password_hash
 from db.database import get_db
 from models.user import User
-from schemas.user import UserUpdate, UserCreate, GetAllUsersResponse, UserOut
-
-from datetime import datetime
-
-from core.security import get_password_hash
-from core.dependencies import require_admin
+from schemas.user import GetAllUsersResponse, UserCreate, UserOut, UserUpdate
 
 # api object defineds everything starts with /users and categorized as users
 # add admin required gate
-router = APIRouter(prefix="/users", tags=["users"], dependencies=[Depends(require_admin)])
+router = APIRouter(
+    prefix="/users", tags=["users"], dependencies=[Depends(require_admin)]
+)
+
 
 # test for ORM TO Pydantic transformation
 @router.get("/", response_model=GetAllUsersResponse)
@@ -70,6 +72,7 @@ def create_user(payload: UserCreate, db: Session = Depends(get_db)):
         created_at=user.created_at.isoformat() if user.created_at else None,
         updated_at=user.updated_at.isoformat() if user.updated_at else None,
     )
+
 
 # update user
 @router.patch("/{user_id}", response_model=UserOut)
