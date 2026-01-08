@@ -2,8 +2,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from core.config import settings
+from routers import document, user, auth
 from core.logging import setup_logging
-from routers import document, user
 
 setup_logging()
 
@@ -23,6 +23,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(auth.router, prefix=settings.API_PREFIX)
 app.include_router(document.router, prefix=settings.API_PREFIX)
 app.include_router(user.router, prefix=settings.API_PREFIX)
 

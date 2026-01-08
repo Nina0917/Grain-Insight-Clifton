@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 from pydantic import BaseModel
 
@@ -28,3 +28,12 @@ class UserCreate(BaseModel):
     password: str
     status_id: int
     role_id: int
+
+
+class UserUpdate(BaseModel):
+    first_name: str
+    last_name: str
+    email: str
+    role_id: int
+    status_id: int
+    password: Optional[str] = None

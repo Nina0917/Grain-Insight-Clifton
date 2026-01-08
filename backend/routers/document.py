@@ -2,9 +2,12 @@ import logging
 import os
 import uuid
 
-from fastapi import APIRouter, BackgroundTasks, Depends, File, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, File, UploadFile, HTTPException, BackgroundTasks
+from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 
+from core.config import settings
+from core.dependencies import get_current_user
 from db.database import get_db
 from models.document import Document
 from models.status import Status
@@ -45,36 +48,70 @@ async def upload_document(
     background_tasks: BackgroundTasks,
     file: UploadFile = File(...),
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
 
-    # 1. 确保目录存在
-    os.makedirs(UPLOAD_DIR, exist_ok=True)
+    allowed_extensions = set(
+        ext.strip() for ext in settings.ALLOWED_EXTENSIONS.split(",")
+    )
+    file_ext = os.path.splitext(file.filename)[1].lower()
 
-    # 2. 生成安全的文件名
-    ext = os.path.splitext(file.filename)[1]
-    stored_filename = f"{uuid.uuid4()}{ext}"
-    file_path = os.path.join(UPLOAD_DIR, stored_filename)
+    if file_ext not in allowed_extensions:
+        raise HTTPException(
+            status_code=400,
+            detail=f"File type '{file_ext}' not allowed. Allowed types: {settings.ALLOWED_EXTENSIONS}",
+        )
 
-    # 3. 流式保存文件到磁盘（重点）
-    with open(file_path, "wb") as buffer:
-        while chunk := await file.read(1024 * 1024):
-            buffer.write(chunk)
+    contents = await file.read()
+    file_size = len(contents)
 
-    processing_status = db.query(Status).filter(Status.name == "Processing").first()
+    if file_size > settings.MAX_FILE_SIZE:
+        max_size_mb = settings.MAX_FILE_SIZE / 1024 / 1024
+        raise HTTPException(
+            status_code=400,
+            detail=f"File size ({file_size / 1024 / 1024:.2f}MB) exceeds maximum allowed size ({max_size_mb}MB)",
+        )
 
-    # 4. 创建 document 记录
+    os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
+
+    stored_filename = f"{uuid.uuid4()}{file_ext}"
+    file_path = os.path.join(settings.UPLOAD_DIR, stored_filename)
+
+    # Save file to disk
+    try:
+        with open(file_path, "wb") as buffer:
+            buffer.write(contents)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to save file: {str(e)}")
+
+    # processing_status = db.query(Status).filter(Status.name == "Processing").first()
+
+    uploaded_status = db.query(Status).filter(Status.name == "Uploaded").first()
+
+    if not uploaded_status:
+        if os.path.exists(file_path):
+            os.remove(file_path)
+        raise HTTPException(
+            status_code=500, detail="Uploaded status not found in database"
+        )
+    # Create document record in database
     document = Document(
-        user_id=1,  # TODO: 替换为实际用户 ID
+        user_id=current_user.id,
         original_filename=file.filename,
         stored_filename=stored_filename,
         file_path=file_path,
         content_type=file.content_type,
-        status_id=processing_status.id,
+        status_id=uploaded_status.id,
     )
-
-    db.add(document)
-    db.commit()
-    db.refresh(document)
+    try:
+        db.add(document)
+        db.commit()
+        db.refresh(document)
+    except Exception as e:
+        if os.path.exists(file_path):
+            os.remove(file_path)
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
 
     background_tasks.add_task(
         process_document,

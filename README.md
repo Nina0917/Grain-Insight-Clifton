@@ -23,6 +23,27 @@ cd backend
 uv sync
 ```
 
+### Download Deep Learning Model Files 
+
+Put the following files into backend/models
+
+```
+https://drive.google.com/file/d/1zlJ0IE5E2oYyTcnOk7PD6LLIn8gADKac/view?usp=sharing
+
+https://drive.google.com/file/d/1qxI6tlulXe4hpUzg3yvu48j5RiURbPGl/view?usp=sharing
+```
+
+### Configure Environment Variables
+Copy the example environment file:
+```
+cd backend
+cp .env.example .env
+```
+Generate a secure JWT SECRET_KEY:
+```
+python -c "import secrets; print(secrets.token_hex(32))"
+```
+Update your .env file with the generated key
 ### Config interpretor
 
 ```

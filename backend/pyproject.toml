@@ -17,6 +17,7 @@ dependencies = [
     "rtree>=1.4.1",
     "scikit-learn>=1.8.0",
     "segmenteverygrain>=0.2.3",
+    "python-jose[cryptography]>=3.5.0",
     "sqlalchemy>=2.0.45",
     "torch>=2.9.1",
     "torchvision>=0.24.1",

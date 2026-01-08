@@ -15,6 +15,11 @@ def process_document(document_id: int):
     try:
         document = db.query(Document).get(document_id)
 
+        # Update status to 'Processing'
+        document.status_id = db.query(Status).filter_by(name="Processing").first().id
+        db.commit()
+
+        # Use singleton grain analyzer instance
         analyzer = get_grain_analyzer()
 
         csv_path, mask_path = analyzer.analyze(
@@ -22,8 +27,9 @@ def process_document(document_id: int):
             output_prefix=f"storage/results/document_{document.id}",
         )
 
+        # Update status to 'Processed' and set result paths
         processed = db.query(Status).filter_by(name="Processed").first()
-
+        
         document.status_id = processed.id
         document.result_csv_path = csv_path
         document.result_mask_path = mask_path
