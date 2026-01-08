@@ -5,6 +5,8 @@ import UserModal, { UserItem } from "../components/UserModal";
 import "../index.css";
 import { tokenManager } from "../utils/tokenManager";
 
+import axios from "axios";
+
 export default function Users() {
   const [users, setUsers] = useState<UserItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -29,14 +31,12 @@ export default function Users() {
     setLoading(true);
     setError("");
     try {
-      const res = await fetch("http://localhost:8000/api/users/", {
+      const res = await axios.get("/api/users/", {
         headers: getAuthHeaders(),
       });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
-      setUsers(data.users || []);
+      setUsers(res.data.users || []);
     } catch (e: any) {
-      setError(e?.message || "Failed to load users");
+      setError(e?.response?.data?.detail || e?.message || "Failed to load users");
     } finally {
       setLoading(false);
     }
@@ -61,22 +61,24 @@ export default function Users() {
   async function handleSave(payload: any) {
     try {
       if (mode === "create") {
-        const res = await fetch("http://localhost:8000/api/users/", {
-          method: "POST",
-          headers: getAuthHeaders({ "Content-Type": "application/json" }),
-          body: JSON.stringify({
-            first_name: payload.first_name,
-            last_name: payload.last_name,
-            email: payload.email,
-            password: payload.password,
-            role_id: payload.role_id,
-            status_id: payload.status_id,
-          }),
-        });
-
-        if (!res.ok) {
-          const err = await res.json().catch(() => ({}));
-          throw new Error(err?.detail || `HTTP ${res.status}`);
+        try {
+          const res = await axios.post("/api/users/",{
+              first_name: payload.first_name,
+              last_name: payload.last_name,
+              email: payload.email,
+              password: payload.password,
+              role_id: payload.role_id,
+              status_id: payload.status_id,
+            },
+            {
+              headers: getAuthHeaders({
+                "Content-Type": "application/json",
+              }),
+            }
+          );
+        } catch (e: any) {
+          const message = e?.response?.data?.detail || e?.message || "Failed to create user";
+          throw new Error(message);
         }
       }
 
@@ -89,28 +91,30 @@ export default function Users() {
           status_id: payload.status_id,
         };
 
-        // passsword is optional
+        // password： fill to change otherwise remains the same
         if (payload.password && payload.password.trim()) {
           body.password = payload.password.trim();
         }
 
-        const res = await fetch(
-          `http://localhost:8000/api/users/${payload.id}`,
-          {
-            method: "PATCH",
-            headers: getAuthHeaders({ "Content-Type": "application/json" }),
-            body: JSON.stringify(body),
-          }
-        );
-
-        if (!res.ok) {
-          const err = await res.json().catch(() => ({}));
-          throw new Error(err?.detail || `HTTP ${res.status}`);
+        try {
+          const res = await axios.patch(
+            `/api/users/${payload.id}`,
+            body,
+            {
+              headers: getAuthHeaders({
+                "Content-Type": "application/json",
+              }),
+            }
+          );
+        } catch (e: any) {
+          const message = e?.response?.data?.detail || e?.message || "Failed to update user";
+          throw new Error(message);
         }
       }
 
       setOpen(false);
       await loadUsers();
+
     } catch (e: any) {
       alert(e?.message || "Save failed");
     }
