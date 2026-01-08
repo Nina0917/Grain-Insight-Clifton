@@ -11,7 +11,7 @@ app = FastAPI(
     docs_url="/docs",
     redoc_url="/redoc",
 )
-print("ALLOWED_ORIGINS from settings =", settings.ALLOWED_ORIGINS)
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.ALLOWED_ORIGINS,

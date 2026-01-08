@@ -6,44 +6,6 @@ import "../index.css";
 import { tokenManager } from "../utils/tokenManager";
 
 export default function Users() {
-  // // add access control on front end
-  // const raw = localStorage.getItem("auth_user");
-  // const userParsed = raw ? JSON.parse(raw) : null;
-
-  // // status #1 not logged in
-  // if (!userParsed) {
-  //   console.log("here")
-  //   // return <div className="p-6">Please login first.</div>;
-  //   return <div role="alert" className="alert alert-vertical sm:alert-horizontal">
-  //     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="stroke-info h-6 w-6 shrink-0">
-  //       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-  //     </svg>
-  //     <div>
-  //       <h3 className="font-bold">Login Required!</h3>
-  //       <div className="text-xs">Please Login to continue</div>
-  //     </div>
-  //     <button className="btn btn-sm">Log in</button>
-  //   </div>
-  // }
-  // // status #2 logged in with regular user
-  // if (userParsed.role_id !== 1) {
-  //   // return <div className="p-6">403: Admins only.</div>;
-  //   return <div role="alert" className="alert alert-vertical sm:alert-horizontal">
-  //     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="stroke-info h-6 w-6 shrink-0">
-  //       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-  //     </svg>
-  //     <div>
-  //       <h3 className="font-bold">No Authorization!</h3>
-  //       <div className="text-xs">Admins only</div>
-  //     </div>
-  //     <button className="btn btn-sm">Log in</button>
-  //   </div>
-  // }
-
-  // status #3 logged in with admin
-
-  // use mock data at # 0
-  // const [users, setUsers] = useState<UserItem[]>(MOCK_USERS);
   const [users, setUsers] = useState<UserItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -81,16 +43,6 @@ export default function Users() {
   }
 
   useEffect(() => {
-    // //FOR TESTE: mock admin
-    // localStorage.setItem(
-    //   "auth_user",
-    //   JSON.stringify({
-    //     id: 1,
-    //     email: "admin@example.com",
-    //     role_id: 1
-    //   })
-    // );
-    //FOR TEST: mock admin
     loadUsers();
   }, []);
 
@@ -168,12 +120,6 @@ export default function Users() {
   return (
     <div className="min-h-screen">
       <Navbar />
-
-      {/* <div className="container mx-auto p-8">
-        <h1 className="text-3xl font-bold">User Management</h1>
-        <p className="mt-4">This page is only accessible to Admins.</p>
-      </div> */}
-
       <div className="p-6">
         <div className="flex items-center justify-between mb-4">
           <h1 className="text-2xl font-bold">Users</h1>
