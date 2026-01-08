@@ -36,7 +36,9 @@ export default function Users() {
       });
       setUsers(res.data.users || []);
     } catch (e: any) {
-      setError(e?.response?.data?.detail || e?.message || "Failed to load users");
+      setError(
+        e?.response?.data?.detail || e?.message || "Failed to load users"
+      );
     } finally {
       setLoading(false);
     }
@@ -62,7 +64,9 @@ export default function Users() {
     try {
       if (mode === "create") {
         try {
-          const res = await axios.post("/api/users/",{
+          const res = await axios.post(
+            "/api/users/",
+            {
               first_name: payload.first_name,
               last_name: payload.last_name,
               email: payload.email,
@@ -77,7 +81,8 @@ export default function Users() {
             }
           );
         } catch (e: any) {
-          const message = e?.response?.data?.detail || e?.message || "Failed to create user";
+          const message =
+            e?.response?.data?.detail || e?.message || "Failed to create user";
           throw new Error(message);
         }
       }
@@ -97,24 +102,20 @@ export default function Users() {
         }
 
         try {
-          const res = await axios.patch(
-            `/api/users/${payload.id}`,
-            body,
-            {
-              headers: getAuthHeaders({
-                "Content-Type": "application/json",
-              }),
-            }
-          );
+          const res = await axios.patch(`/api/users/${payload.id}`, body, {
+            headers: getAuthHeaders({
+              "Content-Type": "application/json",
+            }),
+          });
         } catch (e: any) {
-          const message = e?.response?.data?.detail || e?.message || "Failed to update user";
+          const message =
+            e?.response?.data?.detail || e?.message || "Failed to update user";
           throw new Error(message);
         }
       }
 
       setOpen(false);
       await loadUsers();
-
     } catch (e: any) {
       alert(e?.message || "Save failed");
     }
