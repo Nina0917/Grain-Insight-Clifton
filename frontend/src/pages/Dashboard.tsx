@@ -1,8 +1,11 @@
 import Navbar from "../components/Navbar"; // Add this import
 import { useAuth } from "../contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 export default function Dashboard() {
   const { user, isAdmin } = useAuth();
+
+  const navigate = useNavigate();
 
   return (
     <div className="min-h-screen">
@@ -27,6 +30,23 @@ export default function Dashboard() {
               >
                 {isAdmin() ? "Admin" : "User"}
               </span>
+            </div>
+            <div className="mt-6 flex gap-3">
+              <button
+                className="btn btn-primary"
+                onClick={() => navigate("/documents")}
+              >
+                Manage Files
+              </button>
+
+              {isAdmin() && (
+                <button
+                  className="btn btn-primary"
+                  onClick={() => navigate("/users")}
+                >
+                  Manage Users
+                </button>
+              )}
             </div>
 
             {/* Admin-only content */}
