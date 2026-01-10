@@ -13,6 +13,7 @@ from tqdm import tqdm
 
 _analyzer = None
 
+# Get the absolute path of the current file
 BASE_DIR = Path(__file__).resolve().parents[1]
 MODELS_DIR = BASE_DIR / "models"
 STORAGE_DIR = BASE_DIR / "storage"
@@ -41,7 +42,7 @@ class GrainAnalyzer:
         image_pred = seg.predict_image(image, self.unet, I=256)
         labels, coords = seg.label_grains(image, image_pred, dbs_max_dist=20.0)
 
-        # 4️⃣ SAM-based refinement
+        # SAM-based refinement
         (
             all_grains,
             labels,
@@ -62,11 +63,12 @@ class GrainAnalyzer:
         output_dir = Path(output_prefix).parent
         output_dir.mkdir(parents=True, exist_ok=True)
 
-        # 5️⃣ Save outputs
+        # Save outputs
         csv_path = f"{output_prefix}.csv"
         mask_path = f"{output_prefix}_mask.png"
 
         grain_data.to_csv(csv_path, index=False)
+
         cv2.imwrite(mask_path, mask_all)
 
         return csv_path, mask_path

@@ -19,20 +19,13 @@ from schemas.document import (
 )
 from tasks.document_tasks import process_document
 
-# from dependencies.auth import get_current_user
-
-UPLOAD_DIR = "uploads/documents"
-
 router = APIRouter(prefix="/documents", tags=["documents"])
-
 
 @router.get("", response_model=list[DocumentResponse])
 def list_documents(
     db: Session = Depends(get_db),
-    # current_user = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
 ):
-    current_user = db.query(User).first()  # TODO: 替换为实际用户获取逻辑
-
     documents = (
         db.query(Document)
         .filter(Document.user_id == current_user.id)
@@ -84,16 +77,8 @@ async def upload_document(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to save file: {str(e)}")
 
-    # processing_status = db.query(Status).filter(Status.name == "Processing").first()
-
     uploaded_status = db.query(Status).filter(Status.name == "Uploaded").first()
 
-    if not uploaded_status:
-        if os.path.exists(file_path):
-            os.remove(file_path)
-        raise HTTPException(
-            status_code=500, detail="Uploaded status not found in database"
-        )
     # Create document record in database
     document = Document(
         user_id=current_user.id,

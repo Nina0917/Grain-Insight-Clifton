@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { fetchDocuments as fetchDocumentsApi } from "../api/documents";
 import DocumentsTable from "../components/DocumentsTable";
+import { tokenManager } from "../utils/tokenManager";
 
 export default function Documents() {
   const [open, setOpen] = useState(false); // determines if the upload modal is open
@@ -10,15 +10,29 @@ export default function Documents() {
   const [documents, setDocuments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
+  function getAuthHeaders(extra?: Record<string, string>) {
+    const token = tokenManager.getToken();
+    if (!token) {
+      throw new Error("No access token. Please login again.");
+    }
+
+    return {
+      Authorization: `Bearer ${token}`,
+      ...(extra ?? {}),
+    };
+  }
+
   useEffect(() => {
     fetchDocuments();
   }, []);
 
   const fetchDocuments = async () => {
     setLoading(true);
-    fetchDocumentsApi()
-      .then(setDocuments)
-      .finally(() => setLoading(false));
+    const res = await axios.get("/api/documents", {
+        headers: getAuthHeaders(),
+      });
+    setDocuments(res.data);
+    setLoading(false);
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -28,7 +42,9 @@ export default function Documents() {
   };
 
   const pollDocumentStatus = async (id: number) => {
-    const res = await axios.get(`/api/documents/${id}`);
+    const res = await axios.get(`/api/documents/${id}`, {
+        headers: getAuthHeaders(),
+      });
     return res.data;
   };
 
@@ -70,9 +86,7 @@ export default function Documents() {
 
     // Use axios to send request
     const res = await axios.post("/api/documents/upload", formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
+      headers: getAuthHeaders(),
     });
 
     const newDoc = {

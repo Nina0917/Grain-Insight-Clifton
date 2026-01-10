@@ -27,6 +27,14 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/documents"
+            element={
+              <ProtectedRoute>
+                <Documents />
+              </ProtectedRoute>
+            }
+          />
 
           {/* Protected route - Users page (requires admin role) */}
           <Route

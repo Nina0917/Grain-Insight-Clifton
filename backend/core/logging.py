@@ -22,6 +22,6 @@ def setup_logging():
                 backupCount=5,
                 encoding="utf-8",
             ),
-            logging.StreamHandler(),  # 👈 仍然输出到 terminal
+            logging.StreamHandler(),  # Output to terminal
         ],
     )

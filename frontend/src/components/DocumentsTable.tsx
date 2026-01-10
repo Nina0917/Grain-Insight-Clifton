@@ -42,6 +42,9 @@ function DocumentsTable({ documents }: DocumentsTableProps) {
                 {doc.status.name === "Processed" && (
                   <span className="text-success">✔ Completed</span>
                 )}
+                {doc.status.name === "Error" && (
+                  <span className="text-error">✘ Failed</span>
+                )}
               </td>
 
               <td>{new Date(doc.uploaded_at).toLocaleString()}</td>
