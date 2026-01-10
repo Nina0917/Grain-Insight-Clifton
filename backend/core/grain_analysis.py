@@ -1,15 +1,13 @@
 # core/grain_analysis.py
-import segmenteverygrain as seg
-import numpy as np
-import cv2
 import logging
-
-from keras.saving import load_model
-from segment_anything import sam_model_registry, SamPredictor
-from keras.utils import load_img
 from pathlib import Path
-from matplotlib import pyplot as plt
-from tqdm import tqdm
+
+import cv2
+import numpy as np
+import segmenteverygrain as seg
+from keras.saving import load_model
+from keras.utils import load_img
+from segment_anything import SamPredictor, sam_model_registry
 
 _analyzer = None
 
@@ -28,7 +26,7 @@ class GrainAnalyzer:
             custom_objects={"weighted_crossentropy": seg.weighted_crossentropy},
         )
 
-        # Load SAM model 
+        # Load SAM model
         self.sam = sam_model_registry["default"](
             checkpoint=MODELS_DIR / "sam_vit_h_4b8939.pth"
         )
@@ -43,13 +41,7 @@ class GrainAnalyzer:
         labels, coords = seg.label_grains(image, image_pred, dbs_max_dist=20.0)
 
         # SAM-based refinement
-        (
-            all_grains,
-            labels,
-            mask_all,
-            grain_data,
-            *_
-        ) = seg.sam_segmentation(
+        (all_grains, labels, mask_all, grain_data, *_) = seg.sam_segmentation(
             self.sam,
             image,
             image_pred,
@@ -72,6 +64,7 @@ class GrainAnalyzer:
         cv2.imwrite(mask_path, mask_all)
 
         return csv_path, mask_path
+
 
 def get_grain_analyzer():
     global _analyzer

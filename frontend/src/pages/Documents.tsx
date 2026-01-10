@@ -29,8 +29,8 @@ export default function Documents() {
   const fetchDocuments = async () => {
     setLoading(true);
     const res = await axios.get("/api/documents", {
-        headers: getAuthHeaders(),
-      });
+      headers: getAuthHeaders(),
+    });
     setDocuments(res.data);
     setLoading(false);
   };
@@ -43,8 +43,8 @@ export default function Documents() {
 
   const pollDocumentStatus = async (id: number) => {
     const res = await axios.get(`/api/documents/${id}`, {
-        headers: getAuthHeaders(),
-      });
+      headers: getAuthHeaders(),
+    });
     return res.data;
   };
 

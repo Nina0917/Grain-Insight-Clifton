@@ -1,9 +1,7 @@
-import logging
 import os
 import uuid
 
-from fastapi import APIRouter, Depends, File, UploadFile, HTTPException, BackgroundTasks
-from fastapi.responses import JSONResponse
+from fastapi import APIRouter, BackgroundTasks, Depends, File, HTTPException, UploadFile
 from sqlalchemy.orm import Session
 
 from core.config import settings
@@ -20,6 +18,7 @@ from schemas.document import (
 from tasks.document_tasks import process_document
 
 router = APIRouter(prefix="/documents", tags=["documents"])
+
 
 @router.get("", response_model=list[DocumentResponse])
 def list_documents(
@@ -110,16 +109,13 @@ async def upload_document(
         message="File uploaded successfully",
     )
 
+
 @router.get("/{document_id}", response_model=DocumentStatusResponse)
 def get_document_status(
     document_id: int,
     db: Session = Depends(get_db),
 ):
-    document = (
-        db.query(Document)
-        .filter(Document.id == document_id)
-        .first()
-    )
+    document = db.query(Document).filter(Document.id == document_id).first()
 
     if not document:
         raise HTTPException(status_code=404, detail="Document not found")

@@ -27,6 +27,7 @@ class DocumentUploadResponse(BaseModel):
     status: str
     message: str
 
+
 class DocumentStatusResponse(BaseModel):
     id: int
     filename: str

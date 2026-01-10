@@ -1,6 +1,6 @@
 # tasks/document_tasks.py
-import logging
 import gc
+import logging
 
 from core.grain_analysis import get_grain_analyzer
 from db.database import SessionLocal
@@ -9,7 +9,7 @@ from models.status import Status
 
 
 def process_document(document_id: int):
-    
+
     db = SessionLocal()
 
     try:
@@ -29,7 +29,7 @@ def process_document(document_id: int):
 
         # Update status to 'Processed' and set result paths
         processed = db.query(Status).filter_by(name="Processed").first()
-        
+
         document.status_id = processed.id
         document.result_csv_path = csv_path
         document.result_mask_path = mask_path
@@ -39,9 +39,7 @@ def process_document(document_id: int):
         failed = db.query(Status).filter_by(name="Error").first()
         document.status_id = failed.id
 
-
     finally:
         db.commit()
         db.close()
         gc.collect()
-
