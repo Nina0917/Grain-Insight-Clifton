@@ -6,4 +6,8 @@ __pycache__/
 .ruff_cache/
 database.db
 uploads/
+logs/*
+storage/results/*
+models/*.pth
+models/*.keras
 
