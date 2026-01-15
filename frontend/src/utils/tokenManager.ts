@@ -90,4 +90,12 @@ export const tokenManager = {
       return null;
     }
   },
+  /**
+   * Clear the access token from sessionStorage
+   */
+  clearAuth(): void {
+    this.removeToken();
+    sessionStorage.removeItem("auth_user");
+  },
+
 };

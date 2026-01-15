@@ -30,7 +30,7 @@ apiClient.interceptors.response.use(
   (error) => {
     // If token is invalid or expired, redirect to login
     if (error.response?.status === 401) {
-      tokenManager.removeToken();
+      tokenManager.clearAuth();
       window.location.href = "/login";
     }
     return Promise.reject(error);
@@ -54,6 +54,7 @@ export const authService = {
       formData,
       {
         headers: {
+          
           "Content-Type": "application/x-www-form-urlencoded",
         },
       }
@@ -75,10 +76,11 @@ export const authService = {
   },
 
   /**
-   * Logout user by removing token
+   * Logout user and redirect to login
    */
   logout(): void {
-    tokenManager.removeToken();
+    tokenManager.clearAuth();
+    window.location.href = "/login";
   },
 };
 
