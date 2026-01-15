@@ -1,4 +1,4 @@
-import { useAuth } from "../contexts/AuthContext"
+import { useAuth } from "../contexts/AuthContext";
 // src/components/Navbar.tsx
 export default function Navbar() {
   const { logout } = useAuth();
@@ -38,7 +38,9 @@ export default function Navbar() {
             <a>Settings</a>
           </li>
           <li>
-            <button className="btn" onClick={logout}>Logout</button>
+            <button className="btn" onClick={logout}>
+              Logout
+            </button>
           </li>
         </ul>
       </div>

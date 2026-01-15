@@ -54,7 +54,6 @@ export const authService = {
       formData,
       {
         headers: {
-          
           "Content-Type": "application/x-www-form-urlencoded",
         },
       }

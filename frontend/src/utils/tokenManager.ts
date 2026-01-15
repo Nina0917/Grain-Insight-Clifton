@@ -97,5 +97,4 @@ export const tokenManager = {
     this.removeToken();
     sessionStorage.removeItem("auth_user");
   },
-
 };
