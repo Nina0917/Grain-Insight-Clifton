@@ -2,6 +2,7 @@ import os
 import uuid
 
 from fastapi import APIRouter, BackgroundTasks, Depends, File, HTTPException, UploadFile
+from fastapi.responses import FileResponse, StreamingResponse
 from sqlalchemy.orm import Session
 
 from core.config import settings
@@ -12,7 +13,6 @@ from models.status import Status
 from models.user import User
 from schemas.document import (
     DocumentResponse,
-    DocumentStatusResponse,
     DocumentUploadResponse,
 )
 from tasks.document_tasks import process_document
@@ -110,21 +110,121 @@ async def upload_document(
     )
 
 
-@router.get("/{document_id}", response_model=DocumentStatusResponse)
-def get_document_status(
+@router.get("/{document_id}/download/csv")
+def download_csv(
     document_id: int,
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
-    document = db.query(Document).filter(Document.id == document_id).first()
+    """Download CSV results file"""
+    document = (
+        db.query(Document)
+        .filter(Document.id == document_id, Document.user_id == current_user.id)
+        .first()
+    )
 
     if not document:
         raise HTTPException(status_code=404, detail="Document not found")
 
-    return DocumentStatusResponse(
-        id=document.id,
-        filename=document.original_filename,
-        status=document.status,
-        result_csv_url=document.result_csv_path,
-        result_mask_url=document.result_mask_path,
-        error_message="Error Message",
+    if document.status.name != "Processed":
+        raise HTTPException(status_code=400, detail="Document not processed yet")
+
+    if not document.result_csv_path or not os.path.exists(document.result_csv_path):
+        raise HTTPException(status_code=404, detail="CSV file not found")
+
+    filename = f"{os.path.splitext(document.original_filename)[0]}_results.csv"
+
+    return FileResponse(
+        path=document.result_csv_path,
+        media_type="text/csv",
+        filename=filename,
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
+
+
+@router.get("/{document_id}/download/mask")
+def download_mask(
+    document_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Download mask image file"""
+    document = (
+        db.query(Document)
+        .filter(Document.id == document_id, Document.user_id == current_user.id)
+        .first()
+    )
+
+    if not document:
+        raise HTTPException(status_code=404, detail="Document not found")
+
+    if document.status.name != "Processed":
+        raise HTTPException(status_code=400, detail="Document not processed yet")
+
+    if not document.result_mask_path or not os.path.exists(document.result_mask_path):
+        raise HTTPException(status_code=404, detail="Mask image not found")
+
+    filename = f"{os.path.splitext(document.original_filename)[0]}_mask.png"
+
+    return FileResponse(
+        path=document.result_mask_path,
+        media_type="image/png",
+        filename=filename,
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
+
+
+@router.get("/{document_id}/download/all")
+def download_all(
+    document_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Download all result files as ZIP"""
+    import zipfile
+    from io import BytesIO
+
+    document = (
+        db.query(Document)
+        .filter(Document.id == document_id, Document.user_id == current_user.id)
+        .first()
+    )
+
+    if not document:
+        raise HTTPException(status_code=404, detail="Document not found")
+
+    if document.status.name != "Processed":
+        raise HTTPException(status_code=400, detail="Document not processed yet")
+
+    files_to_zip = []
+    if document.result_csv_path and os.path.exists(document.result_csv_path):
+        files_to_zip.append(
+            (
+                document.result_csv_path,
+                f"{os.path.splitext(document.original_filename)[0]}_results.csv",
+            )
+        )
+    if document.result_mask_path and os.path.exists(document.result_mask_path):
+        files_to_zip.append(
+            (
+                document.result_mask_path,
+                f"{os.path.splitext(document.original_filename)[0]}_mask.png",
+            )
+        )
+
+    if not files_to_zip:
+        raise HTTPException(status_code=404, detail="No result files found")
+
+    zip_buffer = BytesIO()
+    with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
+        for file_path, archive_name in files_to_zip:
+            zip_file.write(file_path, archive_name)
+
+    zip_buffer.seek(0)
+    zip_filename = f"{os.path.splitext(document.original_filename)[0]}_results.zip"
+
+    return StreamingResponse(
+        zip_buffer,
+        media_type="application/zip",
+        headers={"Content-Disposition": f'attachment; filename="{zip_filename}"'},
     )

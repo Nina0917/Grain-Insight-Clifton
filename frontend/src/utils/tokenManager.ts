@@ -1,25 +1,33 @@
 const TOKEN_KEY = "access_token";
+const SYNC_KEY = "token_sync"; // Backup key for refresh recovery
 
 export const tokenManager = {
   /**
-   * Save access token to sessionStorage
+   * Save token to sessionStorage
+   * Backup to localStorage for refresh recovery
    */
   setToken(token: string): void {
     sessionStorage.setItem(TOKEN_KEY, token);
+    localStorage.setItem(SYNC_KEY, token);
   },
 
   /**
-   * Get access token from sessionStorage
-   * Returns null if token is expired or doesn't exist
+   * Get token (restore from localStorage if needed)
+   * Returns null if missing or expired
    */
   getToken(): string | null {
-    const token = sessionStorage.getItem(TOKEN_KEY);
+    let token = sessionStorage.getItem(TOKEN_KEY);
 
     if (!token) {
-      return null;
+      token = localStorage.getItem(SYNC_KEY);
+      if (token && !this.isTokenExpired(token)) {
+        sessionStorage.setItem(TOKEN_KEY, token);
+      } else {
+        this.removeToken();
+        return null;
+      }
     }
 
-    // Check if token is expired
     if (this.isTokenExpired(token)) {
       this.removeToken();
       return null;
@@ -29,64 +37,48 @@ export const tokenManager = {
   },
 
   /**
-   * Check if JWT token is expired
+   * Check JWT expiration
    */
   isTokenExpired(token: string): boolean {
     try {
-      // Parse JWT payload (format: header.payload.signature)
-      const base64Url = token.split(".")[1];
-      const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
-      const payload = JSON.parse(window.atob(base64));
-
-      // Get expiration time (in seconds) and convert to milliseconds
-      const exp = payload.exp * 1000;
-
-      // Check if current time is past expiration
-      return Date.now() >= exp;
-    } catch (error) {
-      console.error("Error parsing token:", error);
+      const payload = JSON.parse(
+        window.atob(token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/"))
+      );
+      return Date.now() >= payload.exp * 1000;
+    } catch {
       return true;
     }
   },
 
   /**
-   * Remove access token from sessionStorage
+   * Clear token from storage
    */
   removeToken(): void {
     sessionStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(SYNC_KEY);
   },
 
   /**
-   * Check if valid token exists
+   * Whether a valid token exists
    */
   hasToken(): boolean {
     return !!this.getToken();
   },
 
   /**
-   * Get time remaining until token expires (in minutes)
-   * Returns null if no token or token is expired
+   * Minutes remaining until expiration
    */
   getTokenTimeRemaining(): number | null {
-    const token = sessionStorage.getItem(TOKEN_KEY);
-
-    if (!token) {
-      return null;
-    }
+    const token = this.getToken();
+    if (!token) return null;
 
     try {
-      const base64Url = token.split(".")[1];
-      const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
-      const payload = JSON.parse(window.atob(base64));
-      const exp = payload.exp * 1000;
-      const remaining = exp - Date.now();
-
-      if (remaining <= 0) {
-        return null;
-      }
-
-      return Math.floor(remaining / 1000 / 60); // return minutes
-    } catch (error) {
+      const payload = JSON.parse(
+        window.atob(token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/"))
+      );
+      const remaining = payload.exp * 1000 - Date.now();
+      return remaining > 0 ? Math.floor(remaining / 1000 / 60) : null;
+    } catch {
       return null;
     }
   },
