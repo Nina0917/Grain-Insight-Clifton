@@ -92,7 +92,6 @@ class GrainAnalyzer:
         return csv_path, mask_path
 
 
-
 def get_grain_analyzer():
     global _analyzer
     if _analyzer is None:

@@ -176,24 +176,36 @@ function DocumentsTable({ documents }: DocumentsTableProps) {
                       className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52 z-10 max-h-60 overflow-y-auto"
                     >
                       <li>
-                        <button type="button" onClick={() => handleDownloadCSV(doc)}>
+                        <button
+                          type="button"
+                          onClick={() => handleDownloadCSV(doc)}
+                        >
                           📊 CSV Results
                         </button>
                       </li>
                       <li>
-                        <button type="button" onClick={() => handleDownloadMask(doc)}>
+                        <button
+                          type="button"
+                          onClick={() => handleDownloadMask(doc)}
+                        >
                           🖼️ Mask Image
                         </button>
                       </li>
                       <li className="border-t border-gray-200 mt-1 pt-1">
-                        <button type="button" onClick={() => handleDownloadAll(doc)}>
+                        <button
+                          type="button"
+                          onClick={() => handleDownloadAll(doc)}
+                        >
                           📦 Download All (ZIP)
                         </button>
                       </li>
                     </ul>
                   </div>
                 ) : (
-                  <button className="btn btn-sm btn-outline btn-disabled" disabled>
+                  <button
+                    className="btn btn-sm btn-outline btn-disabled"
+                    disabled
+                  >
                     Download
                   </button>
                 )}

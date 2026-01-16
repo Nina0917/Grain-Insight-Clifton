@@ -2,6 +2,7 @@ import os
 import uuid
 
 from fastapi import APIRouter, BackgroundTasks, Depends, File, HTTPException, UploadFile
+from fastapi.responses import FileResponse, StreamingResponse
 from sqlalchemy.orm import Session
 
 from core.config import settings
@@ -12,11 +13,9 @@ from models.status import Status
 from models.user import User
 from schemas.document import (
     DocumentResponse,
-    DocumentStatusResponse,
     DocumentUploadResponse,
 )
 from tasks.document_tasks import process_document
-from fastapi.responses import FileResponse, StreamingResponse
 
 router = APIRouter(prefix="/documents", tags=["documents"])
 
@@ -200,11 +199,17 @@ def download_all(
     files_to_zip = []
     if document.result_csv_path and os.path.exists(document.result_csv_path):
         files_to_zip.append(
-            (document.result_csv_path, f"{os.path.splitext(document.original_filename)[0]}_results.csv")
+            (
+                document.result_csv_path,
+                f"{os.path.splitext(document.original_filename)[0]}_results.csv",
+            )
         )
     if document.result_mask_path and os.path.exists(document.result_mask_path):
         files_to_zip.append(
-            (document.result_mask_path, f"{os.path.splitext(document.original_filename)[0]}_mask.png")
+            (
+                document.result_mask_path,
+                f"{os.path.splitext(document.original_filename)[0]}_mask.png",
+            )
         )
 
     if not files_to_zip:
