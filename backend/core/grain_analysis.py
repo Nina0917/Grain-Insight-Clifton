@@ -61,9 +61,36 @@ class GrainAnalyzer:
 
         grain_data.to_csv(csv_path, index=False)
 
-        cv2.imwrite(mask_path, mask_all)
+        mask = np.asarray(mask_all)
+
+        # Handle shapes like (H, W, 1)
+        if mask.ndim == 3 and mask.shape[-1] == 1:
+            mask = mask[:, :, 0]
+
+        # Convert to uint8 with proper scaling
+        if mask.dtype == np.bool_:
+            mask_u8 = mask.astype(np.uint8) * 255
+        elif np.issubdtype(mask.dtype, np.floating):
+            mmin, mmax = float(mask.min()), float(mask.max())
+            if mmax <= 1.0:
+                # Probability mask in [0,1]
+                mask_u8 = (mask * 255.0).clip(0, 255).astype(np.uint8)
+            else:
+                # Arbitrary float range -> normalize to [0,255]
+                denom = (mmax - mmin) if (mmax - mmin) > 1e-9 else 1.0
+                mask_u8 = ((mask - mmin) / denom * 255.0).clip(0, 255).astype(np.uint8)
+        else:
+            # Integers: if it's 0/1, scale up; otherwise clamp to [0,255]
+            if mask.max() <= 1:
+                mask_u8 = mask.astype(np.uint8) * 255
+            else:
+                mask_u8 = mask.clip(0, 255).astype(np.uint8)
+
+        cv2.imwrite(mask_path, mask_u8)
+        # <<< CHANGE END
 
         return csv_path, mask_path
+
 
 
 def get_grain_analyzer():
