@@ -35,6 +35,7 @@ def list_documents(
 
     return documents
 
+
 @router.get("/{document_id}", response_model=DocumentStatusResponse)
 def get_document_status(
     document_id: int,
