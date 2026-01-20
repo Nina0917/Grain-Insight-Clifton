@@ -13,6 +13,7 @@ from models.status import Status
 from models.user import User
 from schemas.document import (
     DocumentResponse,
+    DocumentStatusResponse,
     DocumentUploadResponse,
 )
 from tasks.document_tasks import process_document
@@ -33,6 +34,30 @@ def list_documents(
     )
 
     return documents
+
+@router.get("/{document_id}", response_model=DocumentStatusResponse)
+def get_document_status(
+    document_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    document = (
+        db.query(Document)
+        .filter(Document.id == document_id, Document.user_id == current_user.id)
+        .first()
+    )
+
+    if not document:
+        raise HTTPException(status_code=404, detail="Document not found")
+
+    return DocumentStatusResponse(
+        id=document.id,
+        filename=document.original_filename,
+        status=document.status,
+        result_csv_url=document.result_csv_path,
+        result_mask_url=document.result_mask_path,
+        error_message="Error Message" if document.status.name == "Error" else None,
+    )
 
 
 @router.post("/upload", response_model=DocumentUploadResponse)
