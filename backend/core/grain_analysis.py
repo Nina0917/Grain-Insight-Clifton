@@ -87,7 +87,6 @@ class GrainAnalyzer:
                 mask_u8 = mask.clip(0, 255).astype(np.uint8)
 
         cv2.imwrite(mask_path, mask_u8)
-        # <<< CHANGE END
 
         return csv_path, mask_path
 
