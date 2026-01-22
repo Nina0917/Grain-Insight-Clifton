@@ -1,25 +1,26 @@
 # Standard imports
 import copy
-
-# Pip imports
-from PIL import Image
-import keras.utils
 import logging
+
+import keras.utils
 import matplotlib as mpl
-import matplotlib.style as mplstyle
 import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
+import matplotlib.style as mplstyle
 import matplotlib.widgets as mwidgets
 import numpy as np
 import pandas as pd
 import rasterio.features
 import segment_anything
-import shapely
-import skimage
-from tqdm import tqdm
 
 # Local imports
 import segmenteverygrain
+import shapely
+import skimage
+
+# Pip imports
+from PIL import Image
+from tqdm import tqdm
 
 # Images larger than this will be downscaled
 # 4k resolution is (2160, 4096)
@@ -282,7 +283,7 @@ class Grain(object):
         """
 
         # Compute grain data if it hasn't been done already
-        data = self.measure() if self.data is None else self.data
+        self.measure() if self.data is None else self.data
         # Create patch (filled polygon)
         (patch,) = ax.fill(
             *(self.xy * scale),
@@ -1771,12 +1772,6 @@ def filter_grains_by_points(
     return point_grains, point_found
 
 
-def filter_grains_by_props(grains: list, **props):
-    for prop, func in props.items():
-        filtered_grains = [g for g in filtered_grains if func(g.data[prop])]
-    return filtered_grains
-
-
 # Measurements ---------------------------------------------------------------
 
 
@@ -1839,7 +1834,7 @@ def measure_color(image: np.ndarray, polygon: shapely.Polygon) -> dict:
     clipped_polygon = polygon.intersection(image_bounds)
 
     if clipped_polygon.is_empty:
-        logger.warning(f"Polygon is completely outside image bounds")
+        logger.warning("Polygon is completely outside image bounds")
         return {
             "max_intensity-0": 0,
             "min_intensity-0": 0,
@@ -1864,7 +1859,7 @@ def measure_color(image: np.ndarray, polygon: shapely.Polygon) -> dict:
 
     # Additional safety check
     if len(y) == 0 or len(x) == 0:
-        logger.warning(f"No pixels found within polygon after clipping")
+        logger.warning("No pixels found within polygon after clipping")
         return {
             "max_intensity-0": 0,
             "min_intensity-0": 0,

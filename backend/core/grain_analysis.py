@@ -2,7 +2,6 @@
 import logging
 from pathlib import Path
 
-import cv2
 import matplotlib
 import numpy as np
 import segmenteverygrain as seg
