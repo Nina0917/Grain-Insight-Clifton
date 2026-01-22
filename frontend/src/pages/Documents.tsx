@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import DocumentsTable from "../components/DocumentsTable";
 import { tokenManager } from "../utils/tokenManager";
+import Navbar from "../components/Navbar";
 
 export default function Documents() {
   const [open, setOpen] = useState(false); // determines if the upload modal is open
@@ -109,7 +110,8 @@ export default function Documents() {
   }
 
   return (
-    <div>
+    <div className="min-h-screen">
+      <Navbar />
       <div className="p-6">
         <h1 className="text-2xl font-bold mb-4">Documents</h1>
         <button className="btn btn-primary" onClick={() => setOpen(true)}>
