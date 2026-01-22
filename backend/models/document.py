@@ -19,8 +19,6 @@ class Document(Base):
     stored_filename = Column(String(255), nullable=False)
     file_path = Column(String(512), nullable=False)
     content_type = Column(String(100), nullable=False)
-    result_csv_path = Column(String(512), nullable=True)
-    result_mask_path = Column(String(512), nullable=True)
     uploaded_at = Column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )

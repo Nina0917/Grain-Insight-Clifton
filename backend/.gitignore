@@ -7,7 +7,7 @@ __pycache__/
 database.db
 uploads/
 logs/*
-storage/results/*
+storage/analyze_results/*
 models/*.pth
 models/*.keras
 
