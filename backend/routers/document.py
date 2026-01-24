@@ -55,8 +55,6 @@ def get_document_status(
         id=document.id,
         filename=document.original_filename,
         status=document.status,
-        result_csv_url=document.result_csv_path,
-        result_mask_url=document.result_mask_path,
         error_message="Error Message" if document.status.name == "Error" else None,
     )
 

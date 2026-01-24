@@ -2,12 +2,15 @@
 import logging
 from pathlib import Path
 
-import cv2
+import matplotlib
 import numpy as np
 import segmenteverygrain as seg
 from keras.saving import load_model
 from keras.utils import load_img
+from matplotlib import pyplot as plt
 from segment_anything import SamPredictor, sam_model_registry
+
+from core import interactions as si
 
 _analyzer = None
 
@@ -34,61 +37,76 @@ class GrainAnalyzer:
         logging.info("Grain analysis models loaded.")
 
     def analyze(self, image_path: str, output_prefix: str):
-        # load image
+        matplotlib.use("Agg")
+
+        # make sure output directory exists
+        output_prefix = Path(output_prefix)
+        output_prefix.parent.mkdir(parents=True, exist_ok=True)
+
         image = np.array(load_img(image_path))
 
-        image_pred = seg.predict_image(image, self.unet, I=256)
-        labels, coords = seg.label_grains(image, image_pred, dbs_max_dist=20.0)
-
-        # SAM-based refinement
-        (all_grains, labels, mask_all, grain_data, *_) = seg.sam_segmentation(
+        all_grains, _, _ = seg.predict_large_image(
+            image_path,
+            self.unet,
             self.sam,
-            image,
-            image_pred,
-            coords,
-            labels,
             min_area=400.0,
-            plot_image=False,
+            patch_size=2000,
+            overlap=200,
         )
 
-        # Ensure output directory exists
-        output_dir = Path(output_prefix).parent
-        output_dir.mkdir(parents=True, exist_ok=True)
+        grains = si.polygons_to_grains(all_grains, image=image)
+        for g in grains:
+            g.measure()
 
-        # Save outputs
-        csv_path = f"{output_prefix}.csv"
-        mask_path = f"{output_prefix}_mask.png"
+        # Visualization (non-GUI)
+        fig, ax = plt.subplots(figsize=(12, 8))
+        seg.plot_image_w_colorful_grains(
+            image, all_grains, ax, cmap="tab20b", plot_image=True, im_alpha=1.0
+        )
 
-        grain_data.to_csv(csv_path, index=False)
+        fig.savefig(
+            output_prefix.parent / f"{output_prefix.name}_grains.jpg",
+            dpi=150,
+            bbox_inches="tight",
+        )
+        plt.close(fig)
 
-        mask = np.asarray(mask_all)
+        px_per_m = 1856.6
+        summary = si.get_summary(grains, px_per_m)
 
-        # Handle shapes like (H, W, 1)
-        if mask.ndim == 3 and mask.shape[-1] == 1:
-            mask = mask[:, :, 0]
+        # Save grains geojson
+        si.save_grains(
+            output_prefix.parent / f"{output_prefix.name}_grains.geojson",
+            grains,
+        )
 
-        # Convert to uint8 with proper scaling
-        if mask.dtype == np.bool_:
-            mask_u8 = mask.astype(np.uint8) * 255
-        elif np.issubdtype(mask.dtype, np.floating):
-            mmin, mmax = float(mask.min()), float(mask.max())
-            if mmax <= 1.0:
-                # Probability mask in [0,1]
-                mask_u8 = (mask * 255.0).clip(0, 255).astype(np.uint8)
-            else:
-                # Arbitrary float range -> normalize to [0,255]
-                denom = (mmax - mmin) if (mmax - mmin) > 1e-9 else 1.0
-                mask_u8 = ((mask - mmin) / denom * 255.0).clip(0, 255).astype(np.uint8)
-        else:
-            # Integers: if it's 0/1, scale up; otherwise clamp to [0,255]
-            if mask.max() <= 1:
-                mask_u8 = mask.astype(np.uint8) * 255
-            else:
-                mask_u8 = mask.clip(0, 255).astype(np.uint8)
+        # Save summary CSV
+        si.save_summary(
+            output_prefix.parent / f"{output_prefix.name}_summary.csv",
+            grains,
+            px_per_m,
+        )
 
-        cv2.imwrite(mask_path, mask_u8)
+        # Save summary histogram
+        si.save_histogram(
+            output_prefix.parent / f"{output_prefix.name}_summary.jpg",
+            summary=summary,
+        )
 
-        return csv_path, mask_path
+        # Save mask
+        si.save_mask(
+            output_prefix.parent / f"{output_prefix.name}_mask.png",
+            grains,
+            image,
+            scale=False,
+        )
+
+        si.save_mask(
+            output_prefix.parent / f"{output_prefix.name}_mask2.jpg",
+            grains,
+            image,
+            scale=True,
+        )
 
 
 def get_grain_analyzer():

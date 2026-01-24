@@ -1,6 +1,7 @@
 # tasks/document_tasks.py
 import gc
 import logging
+import traceback
 
 from core.grain_analysis import get_grain_analyzer
 from db.database import SessionLocal
@@ -22,20 +23,20 @@ def process_document(document_id: int):
         # Use singleton grain analyzer instance
         analyzer = get_grain_analyzer()
 
-        csv_path, mask_path = analyzer.analyze(
+        analyzer.analyze(
             document.file_path,
-            output_prefix=f"storage/results/document_{document.id}",
+            output_prefix=f"storage/analyze_results/{document.id}/document_{document.id}",
         )
 
         # Update status to 'Processed' and set result paths
         processed = db.query(Status).filter_by(name="Processed").first()
 
         document.status_id = processed.id
-        document.result_csv_path = csv_path
-        document.result_mask_path = mask_path
 
     except Exception as e:
         logging.error(f"❌ Error processing document {document_id}: {e}")
+        traceback.print_exc()
+        # Update status to 'Error'
         failed = db.query(Status).filter_by(name="Error").first()
         document.status_id = failed.id
 

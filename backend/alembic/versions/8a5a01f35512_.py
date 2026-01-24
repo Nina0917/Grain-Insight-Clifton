@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: f3c07cd651c4
+Revision ID: 8a5a01f35512
 Revises:
-Create Date: 2026-01-04 10:33:56.760877
+Create Date: 2026-01-21 21:55:27.140967
 
 """
 
@@ -13,7 +13,7 @@ import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision: str = "f3c07cd651c4"
+revision: str = "8a5a01f35512"
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -82,8 +82,6 @@ def upgrade() -> None:
         sa.Column("stored_filename", sa.String(length=255), nullable=False),
         sa.Column("file_path", sa.String(length=512), nullable=False),
         sa.Column("content_type", sa.String(length=100), nullable=False),
-        sa.Column("result_csv_path", sa.String(length=512), nullable=True),
-        sa.Column("result_mask_path", sa.String(length=512), nullable=True),
         sa.Column(
             "uploaded_at",
             sa.DateTime(timezone=True),
