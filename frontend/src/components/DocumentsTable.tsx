@@ -161,7 +161,10 @@ function DocumentsTable({ documents }: DocumentsTableProps) {
                     </button>
                   </div>
                 ) : (
-                  <button className="btn btn-sm btn-outline btn-disabled" disabled>
+                  <button
+                    className="btn btn-sm btn-outline btn-disabled"
+                    disabled
+                  >
                     Download
                   </button>
                 )}
@@ -215,7 +218,11 @@ function DocumentsTable({ documents }: DocumentsTableProps) {
                     <button
                       className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-100 rounded-lg transition-colors"
                       onClick={() => {
-                        handleDownload(doc, "histogram", `${baseName}_histogram.jpg`);
+                        handleDownload(
+                          doc,
+                          "histogram",
+                          `${baseName}_histogram.jpg`
+                        );
                         setOpenMenuId(null);
                       }}
                     >
@@ -240,7 +247,11 @@ function DocumentsTable({ documents }: DocumentsTableProps) {
                     <button
                       className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-100 rounded-lg transition-colors"
                       onClick={() => {
-                        handleDownload(doc, "geojson", `${baseName}_grains.geojson`);
+                        handleDownload(
+                          doc,
+                          "geojson",
+                          `${baseName}_grains.geojson`
+                        );
                         setOpenMenuId(null);
                       }}
                     >
@@ -265,7 +276,11 @@ function DocumentsTable({ documents }: DocumentsTableProps) {
                     <button
                       className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-100 rounded-lg transition-colors"
                       onClick={() => {
-                        handleDownload(doc, "mask-preview", `${baseName}_mask_preview.jpg`);
+                        handleDownload(
+                          doc,
+                          "mask-preview",
+                          `${baseName}_mask_preview.jpg`
+                        );
                         setOpenMenuId(null);
                       }}
                     >
