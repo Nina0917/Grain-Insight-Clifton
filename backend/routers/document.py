@@ -1,5 +1,7 @@
 import os
 import uuid
+import zipfile
+from io import BytesIO
 
 from fastapi import APIRouter, BackgroundTasks, Depends, File, HTTPException, UploadFile
 from fastapi.responses import FileResponse, StreamingResponse
@@ -21,6 +23,12 @@ from tasks.document_tasks import process_document
 router = APIRouter(prefix="/documents", tags=["documents"])
 
 
+# Helper function for new file path convention
+def get_result_file_path(document_id: int, suffix: str) -> str:
+    """Get result file path based on new directory structure."""
+    return f"storage/analyze_results/{document_id}/document_{document_id}{suffix}"
+
+
 @router.get("", response_model=list[DocumentResponse])
 def list_documents(
     db: Session = Depends(get_db),
@@ -32,7 +40,6 @@ def list_documents(
         .order_by(Document.uploaded_at.desc())
         .all()
     )
-
     return documents
 
 
@@ -66,7 +73,6 @@ async def upload_document(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-
     allowed_extensions = set(
         ext.strip() for ext in settings.ALLOWED_EXTENSIONS.split(",")
     )
@@ -93,7 +99,6 @@ async def upload_document(
     stored_filename = f"{uuid.uuid4()}{file_ext}"
     file_path = os.path.join(settings.UPLOAD_DIR, stored_filename)
 
-    # Save file to disk
     try:
         with open(file_path, "wb") as buffer:
             buffer.write(contents)
@@ -102,7 +107,6 @@ async def upload_document(
 
     uploaded_status = db.query(Status).filter(Status.name == "Uploaded").first()
 
-    # Create document record in database
     document = Document(
         user_id=current_user.id,
         original_filename=file.filename,
@@ -121,10 +125,7 @@ async def upload_document(
         db.rollback()
         raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
 
-    background_tasks.add_task(
-        process_document,
-        document.id,
-    )
+    background_tasks.add_task(process_document, document.id)
 
     return DocumentUploadResponse(
         id=document.id,
@@ -134,13 +135,15 @@ async def upload_document(
     )
 
 
-@router.get("/{document_id}/download/csv")
-def download_csv(
+# Download endpoints
+
+def _get_document_or_404(
     document_id: int,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
-):
-    """Download CSV results file"""
+    db: Session,
+    current_user: User,
+    require_processed: bool = True,
+) -> Document:
+    """Helper to get document with common validation."""
     document = (
         db.query(Document)
         .filter(Document.id == document_id, Document.user_id == current_user.id)
@@ -150,16 +153,30 @@ def download_csv(
     if not document:
         raise HTTPException(status_code=404, detail="Document not found")
 
-    if document.status.name != "Processed":
+    if require_processed and document.status.name != "Processed":
         raise HTTPException(status_code=400, detail="Document not processed yet")
 
-    if not document.result_csv_path or not os.path.exists(document.result_csv_path):
+    return document
+
+
+@router.get("/{document_id}/download/csv")
+def download_csv(
+    document_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Download summary CSV file."""
+    document = _get_document_or_404(document_id, db, current_user)
+
+    file_path = get_result_file_path(document_id, "_summary.csv")
+
+    if not os.path.exists(file_path):
         raise HTTPException(status_code=404, detail="CSV file not found")
 
-    filename = f"{os.path.splitext(document.original_filename)[0]}_results.csv"
+    filename = f"{os.path.splitext(document.original_filename)[0]}_summary.csv"
 
     return FileResponse(
-        path=document.result_csv_path,
+        path=file_path,
         media_type="text/csv",
         filename=filename,
         headers={"Content-Disposition": f'attachment; filename="{filename}"'},
@@ -172,29 +189,113 @@ def download_mask(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Download mask image file"""
-    document = (
-        db.query(Document)
-        .filter(Document.id == document_id, Document.user_id == current_user.id)
-        .first()
-    )
+    """Download mask PNG file."""
+    document = _get_document_or_404(document_id, db, current_user)
 
-    if not document:
-        raise HTTPException(status_code=404, detail="Document not found")
+    file_path = get_result_file_path(document_id, "_mask.png")
 
-    if document.status.name != "Processed":
-        raise HTTPException(status_code=400, detail="Document not processed yet")
-
-    if not document.result_mask_path or not os.path.exists(document.result_mask_path):
+    if not os.path.exists(file_path):
         raise HTTPException(status_code=404, detail="Mask image not found")
 
     filename = f"{os.path.splitext(document.original_filename)[0]}_mask.png"
 
     return FileResponse(
-        path=document.result_mask_path,
+        path=file_path,
         media_type="image/png",
         filename=filename,
         headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
+
+
+@router.get("/{document_id}/download/grains")
+def download_grains(
+    document_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Download grains visualization image."""
+    document = _get_document_or_404(document_id, db, current_user)
+
+    file_path = get_result_file_path(document_id, "_grains.jpg")
+
+    if not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail="Grains image not found")
+
+    filename = f"{os.path.splitext(document.original_filename)[0]}_grains.jpg"
+
+    return FileResponse(
+        path=file_path,
+        media_type="image/jpeg",
+        filename=filename,
+    )
+
+
+@router.get("/{document_id}/download/histogram")
+def download_histogram(
+    document_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Download size histogram image."""
+    document = _get_document_or_404(document_id, db, current_user)
+
+    file_path = get_result_file_path(document_id, "_summary.jpg")
+
+    if not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail="Histogram image not found")
+
+    filename = f"{os.path.splitext(document.original_filename)[0]}_histogram.jpg"
+
+    return FileResponse(
+        path=file_path,
+        media_type="image/jpeg",
+        filename=filename,
+    )
+
+
+@router.get("/{document_id}/download/geojson")
+def download_geojson(
+    document_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Download GeoJSON file."""
+    document = _get_document_or_404(document_id, db, current_user)
+
+    file_path = get_result_file_path(document_id, "_grains.geojson")
+
+    if not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail="GeoJSON file not found")
+
+    filename = f"{os.path.splitext(document.original_filename)[0]}_grains.geojson"
+
+    return FileResponse(
+        path=file_path,
+        media_type="application/geo+json",
+        filename=filename,
+    )
+
+
+@router.get("/{document_id}/download/mask-preview")
+def download_mask_preview(
+    document_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Download mask preview image (JPG)."""
+    document = _get_document_or_404(document_id, db, current_user)
+
+    file_path = get_result_file_path(document_id, "_mask2.jpg")
+
+    if not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail="Mask preview not found")
+
+    filename = f"{os.path.splitext(document.original_filename)[0]}_mask_preview.jpg"
+
+    return FileResponse(
+        path=file_path,
+        media_type="image/jpeg",
+        filename=filename,
     )
 
 
@@ -204,37 +305,26 @@ def download_all(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Download all result files as ZIP"""
-    import zipfile
-    from io import BytesIO
+    """Download all result files as ZIP."""
+    document = _get_document_or_404(document_id, db, current_user)
 
-    document = (
-        db.query(Document)
-        .filter(Document.id == document_id, Document.user_id == current_user.id)
-        .first()
-    )
+    base_name = os.path.splitext(document.original_filename)[0]
 
-    if not document:
-        raise HTTPException(status_code=404, detail="Document not found")
-
-    if document.status.name != "Processed":
-        raise HTTPException(status_code=400, detail="Document not processed yet")
+    # All possible result files
+    result_files = [
+        ("_grains.jpg", f"{base_name}_grains.jpg"),
+        ("_grains.geojson", f"{base_name}_grains.geojson"),
+        ("_summary.csv", f"{base_name}_summary.csv"),
+        ("_summary.jpg", f"{base_name}_histogram.jpg"),
+        ("_mask.png", f"{base_name}_mask.png"),
+        ("_mask2.jpg", f"{base_name}_mask_preview.jpg"),
+    ]
 
     files_to_zip = []
-    if document.result_csv_path and os.path.exists(document.result_csv_path):
-        files_to_zip.append(
-            (
-                document.result_csv_path,
-                f"{os.path.splitext(document.original_filename)[0]}_results.csv",
-            )
-        )
-    if document.result_mask_path and os.path.exists(document.result_mask_path):
-        files_to_zip.append(
-            (
-                document.result_mask_path,
-                f"{os.path.splitext(document.original_filename)[0]}_mask.png",
-            )
-        )
+    for suffix, archive_name in result_files:
+        file_path = get_result_file_path(document_id, suffix)
+        if os.path.exists(file_path):
+            files_to_zip.append((file_path, archive_name))
 
     if not files_to_zip:
         raise HTTPException(status_code=404, detail="No result files found")
@@ -245,7 +335,7 @@ def download_all(
             zip_file.write(file_path, archive_name)
 
     zip_buffer.seek(0)
-    zip_filename = f"{os.path.splitext(document.original_filename)[0]}_results.zip"
+    zip_filename = f"{base_name}_results.zip"
 
     return StreamingResponse(
         zip_buffer,

@@ -5,9 +5,8 @@ import { tokenManager } from "../utils/tokenManager";
 import Navbar from "../components/Navbar";
 
 export default function Documents() {
-  const [open, setOpen] = useState(false); // determines if the upload modal is open
+  const [open, setOpen] = useState(false);
   const [file, setFile] = useState<File | null>(null);
-
   const [documents, setDocuments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -60,8 +59,6 @@ export default function Documents() {
               ? {
                   ...doc,
                   status: data.status,
-                  result_csv_url: data.result_csv_url,
-                  result_mask_url: data.result_mask_url,
                   error_message: data.error_message,
                 }
               : doc
@@ -90,15 +87,7 @@ export default function Documents() {
       headers: getAuthHeaders(),
     });
 
-    const newDoc = {
-      id: res.data.id,
-      filename: file.name,
-      status: { id: null, name: "Processing" },
-    };
-
-    // update documents immediately
     fetchDocuments();
-
     startPolling(res.data.id);
 
     setOpen(false);

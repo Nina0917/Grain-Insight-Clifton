@@ -32,7 +32,4 @@ class DocumentStatusResponse(BaseModel):
     id: int
     filename: str
     status: StatusResponse
-
-    result_csv_url: Optional[str] = None
-    result_mask_url: Optional[str] = None
     error_message: Optional[str] = None
