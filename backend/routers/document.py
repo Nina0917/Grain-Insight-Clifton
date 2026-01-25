@@ -137,6 +137,7 @@ async def upload_document(
 
 # Download endpoints
 
+
 def _get_document_or_404(
     document_id: int,
     db: Session,
