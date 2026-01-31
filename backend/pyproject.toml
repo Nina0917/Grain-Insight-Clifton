@@ -19,9 +19,9 @@ dependencies = [
     "segmenteverygrain>=0.2.3",
     "python-jose[cryptography]>=3.5.0",
     "sqlalchemy>=2.0.45",
-    "torch>=2.9.1",
-    "torchvision>=0.24.1",
     "uvicorn>=0.38.0",
+    "torch==2.9.1",
+    "torchvision==0.24.1",
 ]
 
 [dependency-groups]
@@ -40,8 +40,11 @@ ignore = ["E501"]
 [tool.ruff.lint.per-file-ignores]
 "__init__.py" = ["F401"]
 
-
 [tool.black]
 line-length = 88
 target-version = ["py311"]
+
+[tool.uv.sources.pytorch-cpu]
+url = "https://download.pytorch.org/whl/cpu"
+
 
