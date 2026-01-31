@@ -1,5 +1,3 @@
-# Grain-Insight-Clifton
-
 node version: v20.19.6
 
 python version: v3.11
@@ -76,7 +74,7 @@ uv run alembic upgrade head
 
 This command applies the latest migration(s) to your database
 
-# Run Seeder
+### Run Seeder
 
 ```
 cd backend
@@ -109,7 +107,7 @@ The default daisyUI theme is set to **corporate**
 
 This project switches the database connection method based on the value of the `DEBUG` configuration:
 
-## 1. When DEBUG=True
+### 1. When DEBUG=True
 
 - Directly uses the `DATABASE_URL` configured in the `.env` file.
 - Suitable for local development and testing environments.
@@ -120,7 +118,7 @@ This project switches the database connection method based on the value of the `
   ```
 - This will connect to a local SQLite database.
 
-## 2. When DEBUG=False
+### 2. When DEBUG=False
 
 - Ignores the `DATABASE_URL` in the `.env` file and dynamically constructs the PostgreSQL connection string using the following environment variables:
   - `DB_USER`
@@ -131,7 +129,7 @@ This project switches the database connection method based on the value of the `
 - Suitable for production environments.
 - This will connect to a remote PostgreSQL database.
 
-## 3. Code Snippet
+### 3. Code Snippet
 
 Relevant logic is in `core/config.py`
 
