@@ -160,6 +160,27 @@ def _get_document_or_404(
     return document
 
 
+@router.get("/{document_id}/download/original")
+def download_original(
+    document_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Download original uploaded file."""
+    document = _get_document_or_404(
+        document_id, db, current_user, require_processed=False
+    )
+
+    if not os.path.exists(document.file_path):
+        raise HTTPException(status_code=404, detail="Original file not found")
+
+    return FileResponse(
+        path=document.file_path,
+        media_type=document.content_type,
+        filename=document.original_filename,
+    )
+
+
 @router.get("/{document_id}/download/csv")
 def download_csv(
     document_id: int,
