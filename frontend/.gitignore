@@ -22,3 +22,15 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Backend storage files
+backend/storage/*
+!backend/storage/.gitkeep
+storage/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.env

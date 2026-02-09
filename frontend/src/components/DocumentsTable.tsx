@@ -35,6 +35,8 @@ function DocumentsTable({ documents }: DocumentsTableProps) {
   const [downloading, setDownloading] = useState<string | null>(null);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [imageScale, setImageScale] = useState<number>(1);
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -99,6 +101,48 @@ function DocumentsTable({ documents }: DocumentsTableProps) {
     }
   };
 
+  const handlePreviewOriginal = async (doc: Document) => {
+    const token = tokenManager.getToken();
+    if (!token) {
+      alert("Please login again");
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `/api/documents/${doc.id}/download/original`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      if (!response.ok) throw new Error("Failed to load image");
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      setPreviewImage(url);
+    } catch (error) {
+      alert("Failed to load image");
+    }
+  };
+
+  const closePreview = () => {
+    if (previewImage) {
+      window.URL.revokeObjectURL(previewImage);
+      setPreviewImage(null);
+      setImageScale(1);
+    }
+  };
+
+  const handleWheel = (e: React.WheelEvent) => {
+    e.preventDefault();
+    setImageScale((prevScale) => {
+      const delta = e.deltaY > 0 ? -0.1 : 0.1;
+      const newScale = prevScale + delta;
+      return Math.min(Math.max(newScale, 0.5), 5);
+    });
+  };
+
   const getBaseName = (filename: string) => {
     return filename.replace(/\.[^/.]+$/, "");
   };
@@ -126,7 +170,14 @@ function DocumentsTable({ documents }: DocumentsTableProps) {
         <tbody>
           {documents.map((doc) => (
             <tr key={doc.id}>
-              <td>{doc.original_filename}</td>
+              <td>
+                <button
+                  onClick={() => handlePreviewOriginal(doc)}
+                  className="link link-primary hover:link-secondary cursor-pointer text-left bg-transparent border-0 p-0"
+                >
+                  {doc.original_filename}
+                </button>
+              </td>
 
               <td>
                 {doc.status.name === "Processing" && (
@@ -173,6 +224,35 @@ function DocumentsTable({ documents }: DocumentsTableProps) {
           ))}
         </tbody>
       </table>
+
+      {/* Image Preview Modal */}
+      {previewImage && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80"
+          onClick={closePreview}
+          onWheel={handleWheel}
+        >
+          <button
+            className="absolute top-4 right-4 btn btn-circle btn-ghost text-white hover:bg-white/20 z-10"
+            onClick={closePreview}
+          >
+            <CloseIcon fontSize="large" />
+          </button>
+
+          <img
+            src={previewImage}
+            alt="Preview"
+            style={{
+              transform: `scale(${imageScale})`,
+              transition: "transform 0.1s ease-out",
+              maxWidth: "90vw",
+              maxHeight: "90vh",
+              objectFit: "contain",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
 
       {/* Download Modal - Renders above everything */}
       {openMenuId && (
